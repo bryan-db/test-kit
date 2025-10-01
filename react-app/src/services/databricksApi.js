@@ -21,7 +21,11 @@ export class DatabricksJobsClient {
   constructor(getAccessToken, onTokenRefresh = null) {
     this.getAccessToken = getAccessToken;
     this.onTokenRefresh = onTokenRefresh;
-    this.baseUrl = import.meta.env.VITE_DATABRICKS_HOST || 'https://e2-demo-field-eng.cloud.databricks.com';
+    // In development, use relative URLs so Vite proxy can handle CORS
+    // In production, use full Databricks host URL
+    this.baseUrl = import.meta.env.DEV
+      ? ''
+      : (import.meta.env.VITE_DATABRICKS_HOST || 'https://e2-demo-field-eng.cloud.databricks.com');
     this.timeout = 30000; // 30 seconds
   }
 
