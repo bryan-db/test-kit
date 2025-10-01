@@ -109,8 +109,10 @@ export function JobStatusDisplay({ jobRunId, config, workspaceUrl }) {
   };
 
   // Job run workspace link (FR-041)
-  const jobRunUrl = workspaceUrl
-    ? `${workspaceUrl}/#job/${jobStatus.jobId}/run/${jobRunId}`
+  // Use jobId from status if available, otherwise fall back to env var
+  const jobId = jobStatus.jobId || import.meta.env.VITE_FEATURE_001_JOB_ID;
+  const jobRunUrl = workspaceUrl && jobId
+    ? `${workspaceUrl}/#job/${jobId}/run/${jobRunId}`
     : null;
 
   return (
