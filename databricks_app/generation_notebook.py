@@ -1,12 +1,13 @@
-"""
-Databricks notebook for executing synthetic data generation pipeline.
+# Databricks notebook source
+# MAGIC %md
+# MAGIC # Synthetic Identity Graph Data Generation
+# MAGIC
+# MAGIC This notebook is submitted as a Databricks Job by the wizard UI and executes
+# MAGIC the full data generation pipeline with the provided configuration.
+# MAGIC
+# MAGIC **Usage:** Submit as job with parameter `config` (JSON-encoded GenerationConfig)
 
-This notebook is submitted as a Databricks Job by the wizard UI and executes
-the full data generation pipeline with the provided configuration.
-
-Usage:
-    Submit as job with parameter: config_json (JSON-encoded GenerationConfig)
-"""
+# COMMAND ----------
 
 import json
 import sys
@@ -26,6 +27,7 @@ except NameError:
                 return default
     dbutils = MockDbutils()
 
+# COMMAND ----------
 
 def parse_config() -> Dict[str, Any]:
     """Parse configuration from job parameters.
@@ -54,6 +56,7 @@ def parse_config() -> Dict[str, Any]:
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON in config parameter: {e}")
 
+# COMMAND ----------
 
 def initialize_spark() -> SparkSession:
     """Get the active Spark session.
@@ -78,6 +81,7 @@ def log_progress(phase: str, message: str) -> None:
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{timestamp}] [{phase}] {message}")
 
+# COMMAND ----------
 
 def execute_generation_pipeline(
     spark: SparkSession,
@@ -148,6 +152,7 @@ def execute_generation_pipeline(
 
     return result
 
+# COMMAND ----------
 
 def write_result_to_volumes(result: Dict[str, Any], config: Dict[str, Any]) -> None:
     """Write generation result to Unity Catalog Volumes for wizard retrieval.
@@ -181,6 +186,12 @@ def write_result_to_volumes(result: Dict[str, Any], config: Dict[str, Any]) -> N
     except Exception as e:
         log_progress("WARNING", f"Failed to write result to volumes: {e}")
 
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Main Execution
+
+# COMMAND ----------
 
 def main() -> None:
     """Main execution entry point."""
