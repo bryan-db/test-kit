@@ -55,6 +55,7 @@ export function useJobPolling(jobRunId, config, options = {}) {
 
       const status = {
         runId: response.run_id,
+        jobId: response.job_id,
         lifecycleState: response.state?.life_cycle_state || 'PENDING',
         resultState: response.state?.result_state,
         stateMessage: response.state?.state_message || '',
@@ -111,6 +112,7 @@ export function useJobPolling(jobRunId, config, options = {}) {
    * Stop polling for job status
    */
   const stopPolling = useCallback(() => {
+    console.log('stopPolling called');
     setIsPolling(false);
 
     if (intervalRef.current) {
@@ -127,9 +129,36 @@ export function useJobPolling(jobRunId, config, options = {}) {
   /**
    * Manually refresh job status (outside polling interval)
    */
-  const refresh = useCallback(() => {
-    return fetchJobStatus();
-  }, [fetchJobStatus]);
+  const refresh = useCallback(async () => {
+    if (!clientRef.current) return null;
+
+    try {
+      console.log('Manual refresh for run ID:', jobRunId);
+      const response = await clientRef.current.getJobRun(jobRunId);
+
+      const status = {
+        runId: response.run_id,
+        jobId: response.job_id,
+        lifecycleState: response.state?.life_cycle_state || 'PENDING',
+        resultState: response.state?.result_state,
+        stateMessage: response.state?.state_message || '',
+        startTime: response.start_time,
+        setupDuration: response.setup_duration,
+        executionDuration: response.execution_duration,
+        endTime: response.end_time,
+      };
+
+      setJobStatus(status);
+      const calculatedProgress = calculateProgress(status);
+      setProgress(calculatedProgress);
+      setError(null);
+      return status;
+    } catch (err) {
+      console.error('Error refreshing job status:', err);
+      setError(err.message || 'Failed to refresh job status');
+      return null;
+    }
+  }, [jobRunId]);
 
   /**
    * Reset polling state
@@ -145,15 +174,42 @@ export function useJobPolling(jobRunId, config, options = {}) {
 
   // Auto-start polling when jobRunId changes
   useEffect(() => {
-    if (jobRunId && enabled) {
-      startPolling();
-    }
+    if (!jobRunId || !enabled) return;
+
+    console.log('Starting job polling for run ID:', jobRunId);
+    setIsPolling(true);
+    setStartTime(Date.now());
+
+    // Fetch immediately
+    fetchJobStatus();
+
+    // Set up interval for polling
+    intervalRef.current = setInterval(() => {
+      fetchJobStatus();
+    }, pollingInterval);
+
+    // Set up timer for elapsed time tracking
+    timerRef.current = setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+    }, 1000);
 
     // Cleanup on unmount or when jobRunId changes
     return () => {
-      stopPolling();
+      console.log('Cleanup: Stopping job polling for run ID:', jobRunId);
+      setIsPolling(false);
+
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     };
-  }, [jobRunId, enabled, startPolling, stopPolling]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobRunId, enabled, pollingInterval]);
 
   // Calculate estimated time remaining
   const timeRemaining = jobStatus && config
