@@ -4,8 +4,6 @@ import { Container, Box, Typography, Button, AppBar, Toolbar } from '@mui/materi
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import HomeIcon from '@mui/icons-material/Home';
 import { JobStatusDisplay } from '../components/job/JobStatusDisplay';
-import { JobErrorDisplay } from '../components/job/JobErrorDisplay';
-import { useJobPolling } from '../hooks/useJobPolling';
 
 /**
  * Job Monitor Page
@@ -14,11 +12,12 @@ import { useJobPolling } from '../hooks/useJobPolling';
 export function JobMonitor() {
   const { runId } = useParams();
   const navigate = useNavigate();
-  const { jobStatus, error, isPolling } = useJobPolling(runId);
 
   const handleBackToWizard = () => {
     navigate('/wizard/0');
   };
+
+  const workspaceUrl = import.meta.env.VITE_DATABRICKS_HOST || 'https://e2-demo-field-eng.cloud.databricks.com';
 
   return (
     <>
@@ -49,16 +48,11 @@ export function JobMonitor() {
           </Typography>
         </Box>
 
-        {/* Job Status Display */}
-        {jobStatus && (
-          <JobStatusDisplay
-            jobStatus={jobStatus}
-            isPolling={isPolling}
-          />
-        )}
-
-        {/* Error Display */}
-        {error && <JobErrorDisplay error={error} runId={runId} />}
+        {/* Job Status Display - handles its own polling */}
+        <JobStatusDisplay
+          jobRunId={runId}
+          workspaceUrl={workspaceUrl}
+        />
 
         {/* Navigation */}
         <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
