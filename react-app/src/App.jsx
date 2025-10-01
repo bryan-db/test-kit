@@ -13,7 +13,7 @@ import { ReviewSubmit } from './components/wizard/ReviewSubmit';
 import { ProgressIndicator } from './components/common/ProgressIndicator';
 import { useConfigPersistence } from './hooks/useConfigPersistence';
 import { updateConfigSection } from './services/configService';
-import { AuthProvider } from './services/authService';
+import { AuthProvider } from './services/authService.jsx';
 import theme from './theme/theme';
 
 /**

@@ -19,7 +19,7 @@ import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import { calculateMetrics, formatNumber } from '../../services/metricsCalculator';
-import { useAuth } from '../../services/authService';
+import { useAuth } from '../../services/authService.jsx';
 import { createDatabricksClient } from '../../services/databricksApi';
 
 /**
