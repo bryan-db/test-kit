@@ -188,7 +188,7 @@
   - Reference: data-model.md §1 Configuration Entity, research.md §4 localStorage Best Practices
   - **Success criteria**: T008 integration test passes (localStorage persistence)
 
-- [ ] **T012** [P] Implement GenerationJob entity with Databricks API response mapping
+- [x] **T012** [P] Implement GenerationJob entity with Databricks API response mapping
   - Path: `react-app/src/services/jobMonitor.js`
   - Implement:
     - mapJobResponse(apiResponse) - map Databricks API response to GenerationJob entity
