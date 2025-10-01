@@ -29,11 +29,44 @@ except NameError:
 
 # COMMAND ----------
 
+import re
+
+def camel_to_snake(name: str) -> str:
+    """Convert camelCase to snake_case.
+
+    Args:
+        name: String in camelCase format
+
+    Returns:
+        String in snake_case format
+    """
+    # Insert underscore before uppercase letters and convert to lowercase
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+def convert_dict_keys_to_snake_case(data: Any) -> Any:
+    """Recursively convert all dictionary keys from camelCase to snake_case.
+
+    Args:
+        data: Dictionary, list, or primitive value
+
+    Returns:
+        Data with all dict keys converted to snake_case
+    """
+    if isinstance(data, dict):
+        return {camel_to_snake(k): convert_dict_keys_to_snake_case(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [convert_dict_keys_to_snake_case(item) for item in data]
+    else:
+        return data
+
+
 def parse_config() -> Dict[str, Any]:
     """Parse configuration from job parameters.
 
     Returns:
-        Configuration dictionary
+        Configuration dictionary with snake_case keys
     """
     # Get config from notebook_params (passed by Jobs API run-now)
     try:
@@ -52,6 +85,8 @@ def parse_config() -> Dict[str, Any]:
 
     try:
         config = json.loads(config_json)
+        # Convert all camelCase keys to snake_case to match Python dataclass expectations
+        config = convert_dict_keys_to_snake_case(config)
         return config
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON in config parameter: {e}")
