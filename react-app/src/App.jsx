@@ -1,5 +1,8 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { Container, Box, Typography, AppBar, Toolbar, Button } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SettingsIcon from '@mui/icons-material/Settings';
+import DatasetIcon from '@mui/icons-material/Dataset';
 import { HouseholdConfig } from './components/wizard/HouseholdConfig';
 import { useConfigPersistence } from './hooks/useConfigPersistence';
 import { updateConfigSection } from './services/configService';
@@ -55,18 +58,23 @@ function App() {
       {/* App Bar - Sticky with animated title */}
       <AppBar position="sticky" elevation={0} sx={{ top: 0, borderRadius: 0 }}>
         <Toolbar>
-          <Typography
-            variant="h6"
+          <Box
             sx={{
               flexGrow: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
               opacity: showTitleInAppBar ? 1 : 0,
               transform: showTitleInAppBar ? 'translateY(0)' : 'translateY(-10px)',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
-            Synthetic Data Configuration
-          </Typography>
-          <Button color="inherit" onClick={handleStartFresh}>
+            <SettingsIcon />
+            <Typography variant="h6">
+              Synthetic Data Configuration
+            </Typography>
+          </Box>
+          <Button color="inherit" onClick={handleStartFresh} startIcon={<RefreshIcon />}>
             Start Fresh
           </Button>
         </Toolbar>
@@ -75,9 +83,12 @@ function App() {
       {/* Main Content */}
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box ref={titleRef} sx={{ mb: 4, textAlign: 'center' }}>
-          <Typography variant="h3" gutterBottom>
-            Synthetic Data Configuration
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 1 }}>
+            <DatasetIcon sx={{ fontSize: 48 }} color="primary" />
+            <Typography variant="h3" gutterBottom sx={{ mb: 0 }}>
+              Synthetic Data Configuration
+            </Typography>
+          </Box>
           <Typography variant="body1" color="text.secondary">
             Configure household parameters and distribution settings
           </Typography>

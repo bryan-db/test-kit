@@ -8,6 +8,10 @@ import {
   Grid,
   Alert,
 } from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
+import PeopleIcon from '@mui/icons-material/People';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import { useDistributionSlider } from '../../hooks/useDistributionSlider';
 import { calculateMetrics, formatNumber } from '../../services/metricsCalculator';
 import { validateDistributionSum } from '../../utils/proportionalRedistribute';
@@ -50,9 +54,12 @@ export function HouseholdConfig({ config, onUpdate }) {
 
   return (
     <Box sx={{ maxWidth: 800, margin: '0 auto' }}>
-      <Typography variant="h4" gutterBottom>
-        Household Configuration
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+        <HomeWorkIcon sx={{ fontSize: 32 }} color="primary" />
+        <Typography variant="h4" gutterBottom sx={{ mb: 0 }}>
+          Household Configuration
+        </Typography>
+      </Box>
       <Typography variant="body1" color="text.secondary" paragraph>
         Configure the number of households and their characteristics
       </Typography>
@@ -60,9 +67,12 @@ export function HouseholdConfig({ config, onUpdate }) {
       {/* Number of Households - Log Scale Slider (FR-006) */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Number of Households
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <HomeIcon color="primary" />
+            <Typography variant="h6">
+              Number of Households
+            </Typography>
+          </Box>
           <Typography variant="body2" color="text.secondary" gutterBottom>
             Total households to generate (1,000 - 10,000,000)
           </Typography>
@@ -102,9 +112,12 @@ export function HouseholdConfig({ config, onUpdate }) {
       {/* Household Size Distribution (FR-008) */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Household Size Distribution
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <PeopleIcon color="primary" />
+            <Typography variant="h6">
+              Household Size Distribution
+            </Typography>
+          </Box>
 
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
@@ -143,9 +156,12 @@ export function HouseholdConfig({ config, onUpdate }) {
       {/* Income Bracket Distribution (FR-009, FR-010) */}
       <Card>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Income Bracket Distribution
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <AttachMoneyIcon color="primary" />
+            <Typography variant="h6">
+              Income Bracket Distribution
+            </Typography>
+          </Box>
           <Typography variant="body2" color="text.secondary" gutterBottom>
             Adjust one slider and others will automatically redistribute proportionally
           </Typography>
