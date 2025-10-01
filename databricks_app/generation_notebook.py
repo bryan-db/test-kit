@@ -33,19 +33,26 @@ def parse_config() -> Dict[str, Any]:
     Returns:
         Configuration dictionary
     """
-    config_json = dbutils.widgets.get("config_json", "{}")  # type: ignore
+    # Get config from notebook_params (passed by Jobs API run-now)
+    try:
+        config_json = dbutils.widgets.get("config")  # type: ignore
+    except Exception:
+        raise ValueError(
+            "config parameter is required. "
+            "Pass GenerationConfig as JSON string via notebook_params."
+        )
 
     if not config_json or config_json == "{}":
         raise ValueError(
-            "config_json parameter is required. "
-            "Pass GenerationConfig as JSON string."
+            "config parameter is empty. "
+            "Pass GenerationConfig as JSON string via notebook_params."
         )
 
     try:
         config = json.loads(config_json)
         return config
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON in config_json parameter: {e}")
+        raise ValueError(f"Invalid JSON in config parameter: {e}")
 
 
 def initialize_spark() -> SparkSession:
