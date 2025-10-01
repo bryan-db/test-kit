@@ -22,7 +22,7 @@ export function JobMonitor() {
   return (
     <>
       {/* App Bar */}
-      <AppBar position="sticky" elevation={0}>
+      <AppBar position="sticky" elevation={0} sx={{ borderRadius: 0 }}>
         <Toolbar>
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="h6">Job Monitor</Typography>

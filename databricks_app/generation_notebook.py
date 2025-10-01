@@ -205,7 +205,6 @@ def main() -> None:
         # Initialize Spark
         spark = initialize_spark()
         log_progress("SPARK", f"Spark version: {spark.version}")
-        log_progress("SPARK", f"Master: {spark.sparkContext.master}")
 
         # Execute pipeline
         start_time = datetime.now()
