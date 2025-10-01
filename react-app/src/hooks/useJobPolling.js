@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { calculateProgress, estimateTimeRemaining } from '../services/jobMonitor';
+import { useAuth } from '../services/authService.jsx';
+import { createDatabricksClient } from '../services/databricksApi';
 
 /**
  * Custom hook for polling Databricks job status
@@ -18,6 +20,7 @@ export function useJobPolling(jobRunId, config, options = {}) {
     enabled = true,
   } = options;
 
+  const { getAccessToken } = useAuth();
   const [jobStatus, setJobStatus] = useState(null);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
@@ -26,45 +29,60 @@ export function useJobPolling(jobRunId, config, options = {}) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const intervalRef = useRef(null);
   const timerRef = useRef(null);
+  const clientRef = useRef(null);
+
+  // Initialize Databricks API client
+  if (!clientRef.current && getAccessToken) {
+    clientRef.current = createDatabricksClient(getAccessToken);
+  }
 
   /**
    * Fetch job status from Databricks API
-   * This is a mock implementation - actual API call will be implemented in databricksApi.js
    */
   const fetchJobStatus = useCallback(async () => {
-    try {
-      // TODO: Replace with actual Databricks API call when databricksApi.js is implemented
-      // const response = await getJobRun(jobRunId);
+    if (!clientRef.current) {
+      console.error('Databricks API client not initialized');
+      return null;
+    }
 
-      // Mock response for development
-      const mockStatus = {
-        runId: jobRunId,
-        lifecycleState: 'RUNNING',
-        stateMessage: 'Generating synthetic data...',
-        startTime: startTime || Date.now(),
-        setupDuration: 15000,
-        executionDuration: 30000,
+    try {
+      console.log('Fetching job status for run ID:', jobRunId);
+
+      // Call real Databricks API
+      const response = await clientRef.current.getJobRun(jobRunId);
+
+      console.log('Job status response:', response);
+
+      const status = {
+        runId: response.run_id,
+        lifecycleState: response.state?.life_cycle_state || 'PENDING',
+        resultState: response.state?.result_state,
+        stateMessage: response.state?.state_message || '',
+        startTime: response.start_time,
+        setupDuration: response.setup_duration,
+        executionDuration: response.execution_duration,
+        endTime: response.end_time,
       };
 
-      setJobStatus(mockStatus);
+      setJobStatus(status);
 
       // Calculate progress based on lifecycle state
-      const calculatedProgress = calculateProgress(mockStatus);
+      const calculatedProgress = calculateProgress(status);
       setProgress(calculatedProgress);
 
       // Stop polling if job is complete
-      if (['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR'].includes(mockStatus.lifecycleState)) {
+      if (['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR'].includes(status.lifecycleState)) {
         stopPolling();
       }
 
       setError(null);
-      return mockStatus;
+      return status;
     } catch (err) {
       console.error('Error fetching job status:', err);
       setError(err.message || 'Failed to fetch job status');
       return null;
     }
-  }, [jobRunId, startTime]);
+  }, [jobRunId]);
 
   /**
    * Start polling for job status
