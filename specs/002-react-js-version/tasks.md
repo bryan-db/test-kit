@@ -198,8 +198,8 @@
   - Reference: data-model.md §2 GenerationJob Entity
   - **Success criteria**: T006 contract test passes (progress calculation)
 
-- [ ] **T013** Implement AuthToken service with OAuth 2.0 + PKCE flow
-  - Path: `react-app/src/services/authService.js`
+- [x] **T013** ✅ Implement AuthToken service with OAuth 2.0 + PKCE flow
+  - Path: `react-app/src/services/authService.jsx`
   - Implement:
     - generatePKCEChallenge() - SHA-256 hash of 43-128 character code_verifier
     - initiateLogin() - redirect to /oauth/authorize with PKCE challenge
@@ -209,9 +209,9 @@
   - Token storage: React Context (NOT localStorage for security)
   - Reference: research.md §2 OAuth 2.0 Integration, data-model.md §5 AuthToken Entity
   - Blocked by: T004 (contract test must fail first)
-  - **Success criteria**: T004 contract test passes, T010 integration test passes
+  - **Success criteria**: T004 contract test passes, T010 integration test passes ✅ Complete - OAuth with dev mode fallback
 
-- [ ] **T014** Implement databricksApi.js client with fetch-based Jobs API integration
+- [x] **T014** ✅ Implement databricksApi.js client with fetch-based Jobs API integration
   - Path: `react-app/src/services/databricksApi.js`
   - Implement DatabricksJobsClient class:
     - submitJob(config) - POST /jobs/run-now (FR-035)
@@ -225,7 +225,7 @@
     - Network timeout → 30 seconds
   - Reference: research.md §3 Databricks Jobs API Integration, contracts/databricks-jobs-api.yaml
   - Blocked by: T005, T006, T007 (contract tests must fail first)
-  - **Success criteria**: T005, T006, T007 contract tests pass
+  - **Success criteria**: T005, T006, T007 contract tests pass ✅ Complete - Jobs API client with retry logic
 
 - [x] **T015** [P] Implement WizardStep entity with validation rules
   - Path: `react-app/src/services/validationService.js`
@@ -495,7 +495,7 @@
   - Blocked by: T003, T013, T023-T027, T028
   - **Success criteria**: Full application loads and routes work
 
-- [x] **T036** Implement main.jsx application entry point
+- [x] **T036** ✅ Implement main.jsx application entry point
   - Path: `react-app/src/main.jsx`
   - Implement:
     - React root rendering
@@ -503,7 +503,7 @@
     - Environment variable configuration (VITE_DATABRICKS_HOST, VITE_OAUTH_CLIENT_ID, etc.)
   - Create `react-app/src/config.js` for environment variables
   - Blocked by: T035
-  - **Success criteria**: Application starts with `npm run dev`
+  - **Success criteria**: Application starts with `npm run dev` ✅ Complete - Dev server running on http://localhost:5174/
 
 ---
 
