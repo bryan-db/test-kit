@@ -15,6 +15,7 @@ import PendingIcon from '@mui/icons-material/Pending';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { formatDuration } from '../../utils/formatters';
 import { useJobPolling } from '../../hooks/useJobPolling';
+import { JobErrorDisplay } from './JobErrorDisplay';
 
 /**
  * Job Status Display Component with progress bar and lifecycle states
@@ -209,6 +210,13 @@ export function JobStatusDisplay({ jobRunId, config, workspaceUrl }) {
               Job was cancelled
             </Typography>
           </Alert>
+        )}
+
+        {/* Error display with troubleshooting (FR-043) */}
+        {isFailed && (
+          <Box sx={{ mt: 2 }}>
+            <JobErrorDisplay jobStatus={jobStatus} />
+          </Box>
         )}
       </CardContent>
     </Card>
