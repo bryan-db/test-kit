@@ -212,6 +212,51 @@ export function JobStatusDisplay({ jobRunId, config, workspaceUrl }) {
           </Alert>
         )}
 
+        {/* Task-level information */}
+        {jobStatus.tasks && jobStatus.tasks.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Task Details
+            </Typography>
+            {jobStatus.tasks.map((task, index) => (
+              <Box key={index} sx={{ mb: 1, p: 1.5, bgcolor: 'background.default', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" fontWeight={600}>
+                    {task.taskKey}
+                  </Typography>
+                  <Chip
+                    label={`Attempt ${task.attemptNumber + 1}`}
+                    size="small"
+                    variant="outlined"
+                  />
+                </Box>
+                {task.stateMessage && (
+                  <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                    {task.stateMessage}
+                  </Typography>
+                )}
+                {task.setupDuration > 0 && (
+                  <Typography variant="caption" color="text.secondary" display="block">
+                    Setup: {Math.floor(task.setupDuration / 1000)}s | Execution: {Math.floor(task.executionDuration / 1000)}s
+                  </Typography>
+                )}
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        {/* Termination details for failures */}
+        {isFailed && jobStatus.terminationDetails && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            <Typography variant="body2" fontWeight={600}>
+              {jobStatus.terminationDetails.type || 'Error'}: {jobStatus.terminationDetails.code}
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              {jobStatus.terminationDetails.message}
+            </Typography>
+          </Alert>
+        )}
+
         {/* Error display with troubleshooting (FR-043) */}
         {isFailed && (
           <Box sx={{ mt: 2 }}>

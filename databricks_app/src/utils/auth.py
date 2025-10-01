@@ -63,7 +63,9 @@ def verify_catalog_permissions(
             if catalog_grants and catalog_grants.privilege_assignments:
                 for assignment in catalog_grants.privilege_assignments:
                     if assignment.principal == user_principal:
-                        if "USE_CATALOG" in (assignment.privileges or []):
+                        # Convert privileges to strings (they might be enum objects)
+                        privileges = [str(p).replace('Privilege.', '') if hasattr(p, 'value') else str(p) for p in (assignment.privileges or [])]
+                        if "USE_CATALOG" in privileges:
                             has_use_catalog = True
 
             if not has_use_catalog:
@@ -97,7 +99,8 @@ def verify_catalog_permissions(
                 if schema_grants and schema_grants.privilege_assignments:
                     for assignment in schema_grants.privilege_assignments:
                         if assignment.principal == user_principal:
-                            privileges = assignment.privileges or []
+                            # Convert privileges to strings (they might be enum objects)
+                            privileges = [str(p).replace('Privilege.', '') if hasattr(p, 'value') else str(p) for p in (assignment.privileges or [])]
                             if "USE_SCHEMA" in privileges or "USE SCHEMA" in privileges:
                                 has_use_schema = True
                             if "CREATE_TABLE" in privileges or "CREATE TABLE" in privileges:

@@ -160,15 +160,38 @@ export class DatabricksJobsClient {
       runId: response.run_id,
       jobId: response.job_id,
       numberInJob: response.number_in_job,
+      runName: response.run_name,
       lifecycleState: response.state?.life_cycle_state,
       resultState: response.state?.result_state,
       stateMessage: response.state?.state_message,
       startTime: response.start_time,
       setupDuration: response.setup_duration,
       executionDuration: response.execution_duration,
+      runDuration: response.run_duration,
       cleanupDuration: response.cleanup_duration,
       endTime: response.end_time,
       runPageUrl: response.run_page_url,
+      // Include termination details for error display
+      terminationDetails: response.status?.termination_details || null,
+      // Include task information for detailed monitoring
+      tasks: response.tasks?.map(task => ({
+        taskKey: task.task_key,
+        attemptNumber: task.attempt_number,
+        lifecycleState: task.state?.life_cycle_state,
+        resultState: task.state?.result_state,
+        stateMessage: task.state?.state_message,
+        startTime: task.start_time,
+        endTime: task.end_time,
+        setupDuration: task.setup_duration,
+        executionDuration: task.execution_duration,
+        runPageUrl: task.run_page_url,
+        terminationDetails: task.status?.termination_details || null,
+      })) || [],
+      // Overall status info
+      status: {
+        state: response.status?.state,
+        terminationDetails: response.status?.termination_details,
+      },
     };
   }
 
