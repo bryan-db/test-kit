@@ -25,8 +25,9 @@ import { validateDistributionSum } from '../../utils/proportionalRedistribute';
  * @param {Object} props
  * @param {Object} props.config - Current household configuration
  * @param {function} props.onUpdate - Callback when configuration updates
+ * @param {function} props.onNext - Navigate to next step
  */
-export function HouseholdConfig({ config, onUpdate }) {
+export function HouseholdConfig({ config, onUpdate, onNext }) {
   const householdConfig = config?.household || {};
 
   // Income bracket categories
@@ -212,7 +213,7 @@ export function HouseholdConfig({ config, onUpdate }) {
           size="large"
           endIcon={<ArrowForwardIcon />}
           disabled={!incomeBracketsValid}
-          onClick={() => alert('Navigation will be implemented once we add wizard routing')}
+          onClick={onNext}
           sx={{ minWidth: 150 }}
         >
           Next Step
