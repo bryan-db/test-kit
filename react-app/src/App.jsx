@@ -11,6 +11,7 @@ import { EngagementConfig } from './components/wizard/EngagementConfig';
 import { CampaignConfig } from './components/wizard/CampaignConfig';
 import { ReviewSubmit } from './components/wizard/ReviewSubmit';
 import { ProgressIndicator } from './components/common/ProgressIndicator';
+import { JobMonitor } from './pages/JobMonitor';
 import { useConfigPersistence } from './hooks/useConfigPersistence';
 import { updateConfigSection } from './services/configService';
 import { AuthProvider } from './services/authService.jsx';
@@ -58,6 +59,12 @@ function WizardRouter() {
       navigate('/wizard/0');
     }
   }, [resetConfig, navigate]);
+
+  // Handle job submission - navigate to job monitor
+  const handleJobSubmitted = useCallback((runId) => {
+    console.log('Job submitted with run ID:', runId);
+    navigate(`/job/${runId}`);
+  }, [navigate]);
 
   if (loading) {
     return (
@@ -129,6 +136,7 @@ function WizardRouter() {
               config={config?.config}
               onUpdate={handleSectionUpdate('output')}
               onBack={handleBack}
+              onJobSubmitted={handleJobSubmitted}
             />
           )}
         </Box>
@@ -165,6 +173,7 @@ function App() {
         <BrowserRouter basename={basename}>
           <Routes>
             <Route path="/wizard/:step" element={<WizardRouter />} />
+            <Route path="/job/:runId" element={<JobMonitor />} />
             <Route path="/" element={<Navigate to="/wizard/0" replace />} />
             <Route path="*" element={<Navigate to="/wizard/0" replace />} />
           </Routes>
