@@ -1,0 +1,599 @@
+openapi: 3.0.3
+info:
+  title: Synthetic Identity Graph Generator - Databricks App Interface
+  description: |
+    Internal interface contract for the Streamlit-based Databricks App wizard.
+    This defines the session state schema, wizard step configurations, and
+    generation job parameters passed to Databricks Jobs API.
+  version: 1.0.0
+  contact:
+    name: Development Team
+
+components:
+  schemas:
+    WizardStep:
+      type: string
+      enum:
+        - household_config
+        - demographics_config
+        - engagement_config
+        - audience_config
+        - campaign_config
+        - review_submit
+      description: Sequential wizard steps
+
+    SessionState:
+      type: object
+      description: Streamlit session_state schema persisted to Unity Catalog Volumes
+      required:
+        - session_id
+        - current_step
+        - config
+        - created_at
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: Unique session identifier
+        current_step:
+          $ref: '#/components/schemas/WizardStep'
+        config:
+          $ref: '#/components/schemas/GenerationConfig'
+        job_id:
+          type: string
+          nullable: true
+          description: Databricks Job ID if generation has been submitted
+        job_status:
+          type: string
+          enum: [pending, running, succeeded, failed, cancelled]
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    GenerationConfig:
+      type: object
+      description: Complete configuration for synthetic data generation
+      required:
+        - seed
+        - catalog_name
+        - schema_name
+        - household_config
+        - demographics_config
+        - engagement_config
+        - campaign_config
+      properties:
+        seed:
+          type: integer
+          description: Random seed for deterministic generation (FR-011)
+          minimum: 0
+          maximum: 2147483647
+        catalog_name:
+          type: string
+          description: Unity Catalog name
+          default: bryan_li
+        schema_name:
+          type: string
+          description: Schema within catalog
+          default: synthetic_data
+        household_config:
+          $ref: '#/components/schemas/HouseholdConfig'
+        demographics_config:
+          $ref: '#/components/schemas/DemographicsConfig'
+        engagement_config:
+          $ref: '#/components/schemas/EngagementConfig'
+        audience_config:
+          $ref: '#/components/schemas/AudienceConfig'
+        campaign_config:
+          $ref: '#/components/schemas/CampaignConfig'
+
+    HouseholdConfig:
+      type: object
+      description: Wizard Step 1 - Household generation parameters
+      required:
+        - num_households
+        - size_distribution
+      properties:
+        num_households:
+          type: integer
+          description: Number of households to generate (1K-1M+)
+          minimum: 1000
+          maximum: 10000000
+          example: 100000
+        size_distribution:
+          type: object
+          properties:
+            mean:
+              type: number
+              default: 2.5
+              minimum: 1.0
+              maximum: 6.0
+            std_dev:
+              type: number
+              default: 1.2
+              minimum: 0.5
+              maximum: 2.0
+        income_brackets:
+          type: object
+          description: Income bracket distribution weights
+          properties:
+            "<30K":
+              type: number
+              minimum: 0
+              maximum: 1
+            "30-60K":
+              type: number
+              minimum: 0
+              maximum: 1
+            "60-100K":
+              type: number
+              minimum: 0
+              maximum: 1
+            "100-150K":
+              type: number
+              minimum: 0
+              maximum: 1
+            "150K+":
+              type: number
+              minimum: 0
+              maximum: 1
+          default:
+            "<30K": 0.2
+            "30-60K": 0.3
+            "60-100K": 0.3
+            "100-150K": 0.15
+            "150K+": 0.05
+
+    DemographicsConfig:
+      type: object
+      description: Wizard Step 2 - Individual demographics parameters
+      required:
+        - age_range
+        - gender_distribution
+      properties:
+        age_range:
+          type: object
+          properties:
+            min:
+              type: integer
+              minimum: 18
+              maximum: 100
+              default: 18
+            max:
+              type: integer
+              minimum: 18
+              maximum: 100
+              default: 85
+        gender_distribution:
+          type: object
+          properties:
+            Male:
+              type: number
+              minimum: 0
+              maximum: 1
+            Female:
+              type: number
+              minimum: 0
+              maximum: 1
+            "Non-Binary":
+              type: number
+              minimum: 0
+              maximum: 1
+            "Prefer not to say":
+              type: number
+              minimum: 0
+              maximum: 1
+          default:
+            Male: 0.48
+            Female: 0.48
+            "Non-Binary": 0.03
+            "Prefer not to say": 0.01
+        education_distribution:
+          type: object
+          properties:
+            "High School":
+              type: number
+            "Some College":
+              type: number
+            "Bachelor":
+              type: number
+            "Master":
+              type: number
+            "Doctorate":
+              type: number
+        identity_mappings:
+          type: object
+          description: Cross-device identifier configuration (FR-017)
+          properties:
+            identifiers_per_person:
+              type: object
+              properties:
+                mean:
+                  type: integer
+                  minimum: 2
+                  maximum: 15
+                  default: 4
+            identifier_type_distribution:
+              type: object
+              properties:
+                email_hash:
+                  type: number
+                  default: 0.6
+                cookie_id:
+                  type: number
+                  default: 0.9
+                mobile_ad_id:
+                  type: number
+                  default: 0.8
+                device_id:
+                  type: number
+                  default: 0.7
+                ctv_id:
+                  type: number
+                  default: 0.4
+                hashed_phone:
+                  type: number
+                  default: 0.3
+
+    EngagementConfig:
+      type: object
+      description: Wizard Step 3 - Content engagement parameters
+      required:
+        - time_period_days
+        - events_per_person
+      properties:
+        time_period_days:
+          type: integer
+          description: Timespan for engagement data (FR-005)
+          minimum: 7
+          maximum: 730
+          example: 90
+        events_per_person:
+          type: object
+          properties:
+            mean:
+              type: integer
+              minimum: 10
+              maximum: 1000
+              default: 50
+            distribution:
+              type: string
+              enum: [normal, power_law, exponential]
+              default: power_law
+        content_categories:
+          type: array
+          items:
+            type: string
+          default:
+            - News
+            - Sports
+            - Entertainment
+            - Education
+            - Technology
+            - Lifestyle
+        engagement_types:
+          type: object
+          properties:
+            view:
+              type: number
+              default: 0.7
+            click:
+              type: number
+              default: 0.2
+            share:
+              type: number
+              default: 0.05
+            like:
+              type: number
+              default: 0.04
+            comment:
+              type: number
+              default: 0.01
+
+    AudienceConfig:
+      type: object
+      description: Wizard Step 4 - Audience segmentation parameters
+      required:
+        - segments
+      properties:
+        segments:
+          type: array
+          items:
+            type: string
+          default:
+            - Tech Enthusiast
+            - Sports Fan
+            - News Junkie
+            - Entertainment Seeker
+            - Casual User
+        behavioral_thresholds:
+          type: object
+          description: Event frequency thresholds for classification
+          properties:
+            heavy_user_min_daily:
+              type: number
+              default: 10.0
+            moderate_user_min_daily:
+              type: number
+              default: 2.0
+            light_user_min_daily:
+              type: number
+              default: 0.5
+
+    CampaignConfig:
+      type: object
+      description: Wizard Step 5 - Campaign and response parameters
+      required:
+        - num_campaigns
+        - campaign_duration_days
+      properties:
+        num_campaigns:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+        campaign_duration_days:
+          type: object
+          properties:
+            min:
+              type: integer
+              default: 7
+            max:
+              type: integer
+              default: 90
+        channels:
+          type: array
+          items:
+            type: string
+            enum: [email, social, display, video, ctv]
+          default:
+            - email
+            - social
+            - display
+        reach_percentage:
+          type: number
+          description: Percentage of individuals exposed to campaigns
+          minimum: 0.01
+          maximum: 1.0
+          default: 0.3
+        response_rate_range:
+          type: object
+          properties:
+            min:
+              type: number
+              minimum: 0.001
+              maximum: 0.5
+              default: 0.01
+            max:
+              type: number
+              minimum: 0.001
+              maximum: 0.5
+              default: 0.1
+
+    ValidationResult:
+      type: object
+      description: Validation result for wizard step
+      required:
+        - valid
+      properties:
+        valid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+        warnings:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+    JobSubmission:
+      type: object
+      description: Databricks Job submission payload
+      required:
+        - run_name
+        - tasks
+      properties:
+        run_name:
+          type: string
+          example: "synthetic-identity-graph-gen-20251001-123456"
+        tasks:
+          type: array
+          items:
+            type: object
+            properties:
+              task_key:
+                type: string
+              notebook_task:
+                type: object
+                properties:
+                  notebook_path:
+                    type: string
+                    example: "/Workspace/Repos/bryan.li@databricks.com/test-kit/generation_notebook"
+                  base_parameters:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    example:
+                      config_json: "{...GenerationConfig as JSON...}"
+              new_cluster:
+                type: object
+                properties:
+                  spark_version:
+                    type: string
+                    example: "14.3.x-scala2.12"
+                  node_type_id:
+                    type: string
+                    example: "m5.4xlarge"
+                  num_workers:
+                    type: integer
+                    example: 8
+
+    JobStatus:
+      type: object
+      description: Databricks Job run status
+      required:
+        - job_id
+        - state
+      properties:
+        job_id:
+          type: string
+        run_id:
+          type: string
+        state:
+          type: object
+          properties:
+            life_cycle_state:
+              type: string
+              enum: [PENDING, RUNNING, TERMINATING, TERMINATED, SKIPPED, INTERNAL_ERROR]
+            result_state:
+              type: string
+              enum: [SUCCESS, FAILED, TIMEDOUT, CANCELED]
+              nullable: true
+        start_time:
+          type: integer
+          format: int64
+          description: Epoch milliseconds
+        end_time:
+          type: integer
+          format: int64
+          nullable: true
+        execution_duration:
+          type: integer
+          description: Milliseconds
+        progress:
+          type: object
+          properties:
+            percent_complete:
+              type: number
+              minimum: 0
+              maximum: 100
+
+paths:
+  /internal/validate_step:
+    post:
+      summary: Validate wizard step configuration
+      description: Called by Streamlit app to validate step inputs before progression
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                step:
+                  $ref: '#/components/schemas/WizardStep'
+                config:
+                  oneOf:
+                    - $ref: '#/components/schemas/HouseholdConfig'
+                    - $ref: '#/components/schemas/DemographicsConfig'
+                    - $ref: '#/components/schemas/EngagementConfig'
+                    - $ref: '#/components/schemas/AudienceConfig'
+                    - $ref: '#/components/schemas/CampaignConfig'
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+
+  /internal/submit_generation:
+    post:
+      summary: Submit data generation job
+      description: Submits Databricks Job with generation notebook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                config:
+                  $ref: '#/components/schemas/GenerationConfig'
+                session_id:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Job submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  run_id:
+                    type: string
+                  submitted_at:
+                    type: string
+                    format: date-time
+
+  /internal/job_status/{job_id}:
+    get:
+      summary: Poll generation job status
+      description: Queries Databricks Jobs API for job progress
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+
+  /internal/verify_permissions:
+    get:
+      summary: Verify Unity Catalog permissions
+      description: Checks if user has CREATE TABLE privilege on target catalog/schema (NFR-006)
+      parameters:
+        - in: query
+          name: catalog
+          required: true
+          schema:
+            type: string
+            default: bryan_li
+        - in: query
+          name: schema
+          required: true
+          schema:
+            type: string
+            default: synthetic_data
+      responses:
+        '200':
+          description: Permission check result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  has_permission:
+                    type: boolean
+                  missing_privileges:
+                    type: array
+                    items:
+                      type: string
+                      enum: [USE_CATALOG, USE_SCHEMA, CREATE_TABLE]
+
+externalDocs:
+  description: Databricks Apps Documentation
+  url: https://docs.databricks.com/en/dev-tools/databricks-apps/
