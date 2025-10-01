@@ -73,7 +73,10 @@ def verify_catalog_permissions(
                         # Convert privileges to strings (they might be enum objects)
                         privileges = [str(p).replace('Privilege.', '') if hasattr(p, 'value') else str(p) for p in (assignment.privileges or [])]
                         print(f"DEBUG: User privileges on catalog: {privileges}")
-                        if "USE_CATALOG" in privileges:
+                        # ALL_PRIVILEGES includes all specific permissions
+                        if "ALL_PRIVILEGES" in privileges or "ALL PRIVILEGES" in privileges:
+                            has_use_catalog = True
+                        elif "USE_CATALOG" in privileges:
                             has_use_catalog = True
             else:
                 print(f"DEBUG: No privilege assignments found for catalog '{catalog_name}'")
@@ -120,10 +123,15 @@ def verify_catalog_permissions(
                             # Convert privileges to strings (they might be enum objects)
                             privileges = [str(p).replace('Privilege.', '') if hasattr(p, 'value') else str(p) for p in (assignment.privileges or [])]
                             print(f"DEBUG: User privileges on schema: {privileges}")
-                            if "USE_SCHEMA" in privileges or "USE SCHEMA" in privileges:
+                            # ALL_PRIVILEGES includes all specific permissions
+                            if "ALL_PRIVILEGES" in privileges or "ALL PRIVILEGES" in privileges:
                                 has_use_schema = True
-                            if "CREATE_TABLE" in privileges or "CREATE TABLE" in privileges:
                                 has_create_table = True
+                            else:
+                                if "USE_SCHEMA" in privileges or "USE SCHEMA" in privileges:
+                                    has_use_schema = True
+                                if "CREATE_TABLE" in privileges or "CREATE TABLE" in privileges:
+                                    has_create_table = True
                 else:
                     print(f"DEBUG: No privilege assignments found for schema '{catalog_name}.{schema_name}'")
 
@@ -208,6 +216,14 @@ def format_permission_error(
         error_lines.append(
             f"  GRANT CREATE TABLE ON SCHEMA {catalog_name}.{schema_name} TO `{user_principal}`;"
         )
+
+    # Add ALL PRIVILEGES alternative for convenience
+    error_lines.extend([
+        "",
+        "Or grant all privileges at once:",
+        f"  GRANT ALL PRIVILEGES ON CATALOG {catalog_name} TO `{user_principal}`;",
+        f"  GRANT ALL PRIVILEGES ON SCHEMA {catalog_name}.{schema_name} TO `{user_principal}`;",
+    ])
 
     error_lines.extend(
         [
