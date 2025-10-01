@@ -1,0 +1,49 @@
+name: synthetic-data-generator-react
+display_name: Synthetic Identity Graph Generator (React)
+description: React-based web application for configuring and generating synthetic identity graph datasets
+
+# Application type (static site for React SPA)
+type: static
+
+# Build configuration
+build:
+  source_dir: react-app
+  build_command: npm install && npm run build
+  output_dir: react-app/dist
+
+# Runtime configuration
+runtime:
+  # Static file serving (no backend process)
+  port: 8080
+  health_check_path: /
+
+# Environment variables
+env:
+  DATABRICKS_HOST: ${DATABRICKS_HOST}
+  DATABRICKS_CATALOG: bryan_li
+  FEATURE_001_JOB_ID: ${FEATURE_001_JOB_ID}
+  VITE_DATABRICKS_HOST: ${DATABRICKS_HOST}
+  VITE_OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+
+# OAuth 2.0 configuration
+oauth:
+  enabled: true
+  scopes:
+    - jobs:read
+    - jobs:write
+    - catalogs:read
+  redirect_uri: /oauth/callback
+
+# Resource requirements (minimal for static frontend)
+resources:
+  memory: 512Mi
+  cpu: 0.5
+
+# Permissions (Unity Catalog access)
+permissions:
+  - catalog: bryan_li
+    schema: "*"
+    privileges:
+      - SELECT
+      - CREATE_TABLE
+      - MODIFY

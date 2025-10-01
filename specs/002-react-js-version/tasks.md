@@ -509,7 +509,7 @@
 
 ## Phase 3.9: Deployment Configuration
 
-- [ ] **T037** Create databricks-app.yml manifest for Databricks Apps deployment
+- [x] **T037** ✅ Create databricks-app.yml manifest for Databricks Apps deployment
   - Path: `react-app/databricks-app.yml`
   - Implement:
     - App metadata (name, display_name, description)
@@ -522,7 +522,7 @@
   - Reference: research.md §9 Databricks Apps Deployment Manifest
   - **Success criteria**: Manifest validates with `databricks apps build`
 
-- [ ] **T038** Configure Vite build for Databricks Apps deployment
+- [x] **T038** ✅ Configure Vite build for Databricks Apps deployment
   - Path: `react-app/vite.config.js`
   - Update configuration:
     - base: '/apps/synthetic-data-generator-react/' (Databricks Apps path prefix)
