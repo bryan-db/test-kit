@@ -215,6 +215,17 @@ def execute_generation_pipeline(
 
     log_progress("VALIDATION", "Checking Unity Catalog permissions...")
 
+    # Create schema if it doesn't exist
+    catalog_name = generation_config.catalog_name
+    schema_name = generation_config.schema_name
+
+    log_progress("SETUP", f"Creating schema if not exists: {catalog_name}.{schema_name}")
+    try:
+        spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog_name}.{schema_name}")
+        log_progress("SETUP", f"Schema {catalog_name}.{schema_name} is ready")
+    except Exception as e:
+        log_progress("WARNING", f"Could not create schema: {e}")
+
     # Permission check will be done in pipeline
     log_progress("GENERATION", "Starting data generation pipeline...")
 
