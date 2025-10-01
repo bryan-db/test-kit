@@ -309,7 +309,7 @@
   - Reference: research.md §6 Proportional Redistribution Algorithm
   - **Success criteria**: Sliders auto-adjust in wizard components (FR-010, FR-013, FR-015, FR-022)
 
-- [ ] **T022** [P] Implement useJobPolling hook for 5-second status polling with abort
+- [x] **T022** ✅ [P] Implement useJobPolling hook for 5-second status polling with abort
   - Path: `react-app/src/hooks/useJobPolling.js`
   - Implement:
     - startPolling(runId) - poll getJobRun() every 5 seconds (FR-037)
