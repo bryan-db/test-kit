@@ -396,7 +396,7 @@
 ## Phase 3.6: Common UI Components
 **Blocked by: T003 (theme must exist first)**
 
-- [ ] **T028** [P] Implement ProgressIndicator component with 5-step stepper
+- [x] **T028** ✅ [P] Implement ProgressIndicator component with 5-step stepper
   - Path: `react-app/src/components/common/ProgressIndicator.jsx`
   - Implement:
     - Material Design 3 Stepper with 5 steps (FR-002)
@@ -407,7 +407,7 @@
   - Uses: theme.js (T003)
   - **Success criteria**: Progress indicator shows current step in wizard flow T008
 
-- [ ] **T029** [P] Implement DistributionSlider component with auto-adjust logic
+- [x] **T029** ✅ [P] Implement DistributionSlider component with auto-adjust logic
   - Path: `react-app/src/components/common/DistributionSlider.jsx`
   - Implement:
     - Slider group for distribution values (e.g., income brackets, gender, education)
@@ -418,7 +418,7 @@
   - Uses: useDistributionSlider (T021), theme.js (T003)
   - **Success criteria**: Used in T023, T024, T025 wizard components
 
-- [ ] **T030** [P] Implement LogScaleSlider component for 1K-10M household scale
+- [x] **T030** ✅ [P] Implement LogScaleSlider component for 1K-10M household scale
   - Path: `react-app/src/components/common/LogScaleSlider.jsx`
   - Implement:
     - Logarithmic scale slider (1,000 to 10,000,000) (FR-006)
@@ -428,7 +428,7 @@
   - Uses: formatters.js (T018), theme.js (T003)
   - **Success criteria**: Used in T023 HouseholdConfig component
 
-- [ ] **T031** [P] Implement ValidationMessage component for inline error display
+- [x] **T031** ✅ [P] Implement ValidationMessage component for inline error display
   - Path: `react-app/src/components/common/ValidationMessage.jsx`
   - Implement:
     - Display validation errors and warnings (FR-046, FR-048)
@@ -438,7 +438,7 @@
   - Uses: theme.js (T003)
   - **Success criteria**: Validation errors shown in wizard components when sum ≠ 1.0 or min > max
 
-- [ ] **T032** [P] Implement LoadingSpinner component with Material Design 3 circular progress
+- [x] **T032** ✅ [P] Implement LoadingSpinner component with Material Design 3 circular progress
   - Path: `react-app/src/components/common/LoadingSpinner.jsx`
   - Implement:
     - Circular progress indicator (NFR-003 for operations >200ms)
