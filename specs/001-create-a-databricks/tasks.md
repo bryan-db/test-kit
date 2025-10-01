@@ -244,60 +244,61 @@
   - ✅ Implement `format_permission_error()` helper with GRANT SQL statements
   - ✅ Implement `check_permissions_and_fail_fast()` for early validation
 
-## Phase 3.6: Streamlit Wizard UI (Sequential - steps depend on each other)
+## Phase 3.6: Streamlit Wizard UI ✅ COMPLETE
 
-- [ ] **T030**: Create Streamlit app entry point in `databricks_app/app.py`
-  - Initialize Streamlit session_state with wizard_step=0, config={}
-  - Load checkpoint from Unity Catalog Volumes if exists
-  - Display progress indicator (5 steps)
-  - Route to appropriate wizard step component
-  - Handle navigation (Next, Previous buttons)
+- [x] **T030**: Create Streamlit app entry point in `databricks_app/app.py`
+  - ✅ Initialize Streamlit session_state with wizard_step=0, config={}
+  - ✅ Load checkpoint from Unity Catalog Volumes if exists
+  - ✅ Display progress indicator (5 steps)
+  - ✅ Route to appropriate wizard step component
+  - ✅ Handle navigation (Next, Previous buttons)
+  - ✅ Material Design 3 styling applied
 
-- [ ] **T031**: Implement household configuration step in `databricks_app/src/wizard/household_config.py`
-  - Create `render_household_config()` function
-  - Display num_households slider (1K-10M, log scale)
-  - Display household size distribution inputs (mean, std_dev)
-  - Display income bracket weights (5 sliders summing to 1.0)
-  - Validate inputs using HouseholdConfig schema
-  - Save config to session_state on Next click
-  - Return validation result
+- [x] **T031**: Implement household configuration step in `databricks_app/src/wizard/household_config.py`
+  - ✅ Create `render_household_config()` function
+  - ✅ Display num_households slider (1K-10M, log scale)
+  - ✅ Display household size distribution inputs (mean, std_dev)
+  - ✅ Display income bracket weights (5 sliders summing to 1.0)
+  - ✅ Validate inputs using HouseholdConfig schema
+  - ✅ Save config to session_state on Next click
+  - ✅ Return validation result
 
-- [ ] **T032**: Implement demographics configuration step in `databricks_app/src/wizard/demographics_config.py`
-  - Create `render_demographics_config()` function
-  - Display age range inputs (min, max sliders)
-  - Display gender distribution weights (4 sliders summing to 1.0)
-  - Display education distribution select boxes
-  - Display identifiers_per_person slider (2-15)
-  - Display identifier type distribution weights
-  - Validate inputs using DemographicsConfig schema
-  - Save config to session_state on Next click
+- [x] **T032**: Implement demographics configuration step in `databricks_app/src/wizard/demographics_config.py`
+  - ✅ Create `render_demographics_config()` function
+  - ✅ Display age range inputs (min, max sliders)
+  - ✅ Display gender distribution weights (4 sliders summing to 1.0)
+  - ✅ Display education distribution select boxes
+  - ✅ Display identifiers_per_person slider (2-15)
+  - ✅ Display identifier type distribution weights
+  - ✅ Validate inputs using DemographicsConfig schema
+  - ✅ Save config to session_state on Next click
 
-- [ ] **T033**: Implement engagement configuration step in `databricks_app/src/wizard/engagement_config.py`
-  - Create `render_engagement_config()` function
-  - Display time_period_days slider (7-730)
-  - Display events_per_person inputs (mean, distribution select)
-  - Display content categories multi-select
-  - Display engagement type weights (5 sliders summing to 1.0)
-  - Validate inputs using EngagementConfig schema
-  - Save config to session_state on Next click
+- [x] **T033**: Implement engagement configuration step in `databricks_app/src/wizard/engagement_config.py`
+  - ✅ Create `render_engagement_config()` function
+  - ✅ Display time_period_days slider (7-730)
+  - ✅ Display events_per_person inputs (mean, distribution select)
+  - ✅ Display content categories multi-select
+  - ✅ Display engagement type weights (5 sliders summing to 1.0)
+  - ✅ Validate inputs using EngagementConfig schema
+  - ✅ Save config to session_state on Next click
 
-- [ ] **T034**: Implement campaign configuration step in `databricks_app/src/wizard/campaign_config.py`
-  - Create `render_campaign_config()` function
-  - Display num_campaigns slider (1-100)
-  - Display campaign_duration_days range (min/max sliders)
-  - Display channels multi-select (email, social, display, video, ctv)
-  - Display reach_percentage slider (1%-100%)
-  - Display response_rate_range inputs (min/max)
-  - Validate inputs using CampaignConfig schema
-  - Save config to session_state on Next click
+- [x] **T034**: Implement campaign configuration step in `databricks_app/src/wizard/campaign_config.py`
+  - ✅ Create `render_campaign_config()` function
+  - ✅ Display num_campaigns slider (1-100)
+  - ✅ Display campaign_duration_days range (min/max sliders)
+  - ✅ Display channels multi-select (email, social, display, video, ctv)
+  - ✅ Display reach_percentage slider (1%-100%)
+  - ✅ Display response_rate_range inputs (min/max)
+  - ✅ Validate inputs using CampaignConfig schema
+  - ✅ Save config to session_state on Next click
 
-- [ ] **T035**: Implement validation utilities in `databricks_app/src/wizard/validation.py`
-  - Create `validate_step(step_name, config)` function
-  - Check required fields present
-  - Check value ranges (min/max constraints)
-  - Check distribution weights sum to 1.0 where applicable
-  - Return `ValidationResult` with errors/warnings list
-  - Display validation errors in UI with clear messages
+- [x] **T035**: Implement validation utilities in `databricks_app/src/wizard/validation.py`
+  - ✅ Create `validate_step(step_name, config)` function (already existed from earlier implementation)
+  - ✅ Check required fields present
+  - ✅ Check value ranges (min/max constraints)
+  - ✅ Check distribution weights sum to 1.0 where applicable
+  - ✅ Return `ValidationResult` with errors/warnings list
+  - ✅ Display validation errors in UI with clear messages
 
 ## Phase 3.7: Integration & Orchestration
 
@@ -309,25 +310,25 @@
   - Display permission error if insufficient privileges
   - If permissions OK, submit Databricks Job with generation notebook
 
-- [ ] **T037**: Create generation notebook in `databricks_app/generation_notebook.py`
-  - Parse config_json from job parameters (passed by wizard)
-  - Initialize Spark session with Photon and optimized writes
-  - Execute generation phases in order:
+- [x] **T037**: Create generation notebook in `databricks_app/generation_notebook.py`
+  - ✅ Parse config_json from job parameters (passed by wizard)
+  - ✅ Initialize Spark session with Photon and optimized writes
+  - ✅ Execute generation phases in order:
     1. Generate households → write to catalog
     2. Generate individuals + identity_mappings → write to catalog
     3. Generate content_engagements → write to catalog
     4. Derive viewership_patterns + audience_attributes → write to catalog
     5. Generate campaigns + campaign_exposures → write to catalog
     6. Generate response_events + outcome_metrics → write to catalog
-  - Log progress after each phase
-  - Return job result with table names and row counts
+  - ✅ Log progress after each phase
+  - ✅ Return job result with table names and row counts
 
-- [ ] **T038**: Implement progress tracking in `databricks_app/src/utils/progress.py`
-  - Create `poll_job_status(job_id)` function using Databricks Jobs API
-  - Return `JobStatus` with life_cycle_state, result_state, percent_complete
-  - Display Streamlit progress bar with status updates
-  - Poll every 5 seconds until job completes or fails
-  - Display final result (success with table links or error message)
+- [x] **T038**: Implement progress tracking in `databricks_app/src/utils/progress.py`
+  - ✅ Create `poll_job_status(job_id)` function using Databricks Jobs API
+  - ✅ Return `JobStatus` with life_cycle_state, result_state, percent_complete
+  - ✅ Display Streamlit progress bar with status updates
+  - ✅ Poll every 5 seconds until job completes or fails
+  - ✅ Display final result (success with table links or error message)
 
 ## Phase 3.8: Polish
 
