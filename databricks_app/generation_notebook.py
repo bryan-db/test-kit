@@ -143,14 +143,57 @@ def execute_generation_pipeline(
 
     log_progress("INITIALIZATION", "Parsing configuration...")
 
+    # Transform household config from flat to nested structure
+    household_cfg = config.get("household_config", {})
+    household_config = HouseholdConfig(
+        num_households=household_cfg.get("num_households", 1000),
+        income_brackets=household_cfg.get("income_brackets", {}),
+        size_distribution={
+            "mean": household_cfg.get("household_size_mean", 2.5),
+            "std_dev": household_cfg.get("household_size_std_dev", 1.2)
+        },
+        location_distribution=household_cfg.get("location_distribution", {})
+    )
+
+    # Transform demographics config
+    demographics_cfg = config.get("demographics_config", {})
+    demographics_config = DemographicsConfig(
+        age_range=demographics_cfg.get("age_range", {"min": 18, "max": 80}),
+        gender_distribution=demographics_cfg.get("gender_distribution", {}),
+        education_distribution=demographics_cfg.get("education_distribution", {}),
+        employment_distribution=demographics_cfg.get("employment_distribution", {}),
+        identity_mappings=demographics_cfg.get("identity_mappings", {})
+    )
+
+    # Transform engagement config
+    engagement_cfg = config.get("engagement_config", {})
+    engagement_config = EngagementConfig(
+        num_events_per_person=engagement_cfg.get("num_events_per_person", {"min": 1, "max": 100}),
+        event_types=engagement_cfg.get("event_types", {}),
+        duration_range=engagement_cfg.get("duration_range", {"min": 10, "max": 3600}),
+        temporal_pattern=engagement_cfg.get("temporal_pattern", "uniform"),
+        content_categories=engagement_cfg.get("content_categories", {})
+    )
+
+    # Campaign config
+    campaign_cfg = config.get("campaign_config", {})
+    campaign_config = CampaignConfig(
+        num_campaigns=campaign_cfg.get("num_campaigns", 10),
+        channels=campaign_cfg.get("channels", ["email", "social", "display"]),
+        exposure_rate=campaign_cfg.get("exposure_rate", 0.3),
+        response_rate=campaign_cfg.get("response_rate", 0.05),
+        conversion_rate=campaign_cfg.get("conversion_rate", 0.02),
+        campaign_duration_days=campaign_cfg.get("campaign_duration_days", {"min": 7, "max": 30})
+    )
+
     # Convert dict to typed config objects
     generation_config = GenerationConfig(
         seed=config.get("seed", 42),
         catalog_name=config.get("catalog_name", "bryan_li"),
         schema_name=config.get("schema_name", "synthetic_data"),
-        household_config=HouseholdConfig(**config["household_config"]),
-        demographics_config=DemographicsConfig(**config["demographics_config"]),
-        engagement_config=EngagementConfig(**config["engagement_config"]),
+        household_config=household_config,
+        demographics_config=demographics_config,
+        engagement_config=engagement_config,
         audience_config=AudienceConfig(**config.get("audience_config", {
             "segments": ["Tech Enthusiast", "Sports Fan", "News Junkie",
                         "Entertainment Seeker", "Casual User"],
@@ -160,7 +203,7 @@ def execute_generation_pipeline(
                 "light_user_min_daily": 0.5
             }
         })),
-        campaign_config=CampaignConfig(**config["campaign_config"])
+        campaign_config=campaign_config
     )
 
     log_progress("VALIDATION", "Checking Unity Catalog permissions...")
