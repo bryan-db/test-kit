@@ -227,7 +227,7 @@
   - Blocked by: T005, T006, T007 (contract tests must fail first)
   - **Success criteria**: T005, T006, T007 contract tests pass
 
-- [ ] **T015** [P] Implement WizardStep entity with validation rules
+- [x] **T015** [P] Implement WizardStep entity with validation rules
   - Path: `react-app/src/services/validationService.js`
   - Implement:
     - WIZARD_STEPS constant (from data-model.md §3)
