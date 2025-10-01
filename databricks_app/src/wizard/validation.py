@@ -295,7 +295,7 @@ def validate_engagement_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
     # Validate content_categories
     content_categories = config.get("content_categories", {})
-    if content_categories:
+    if content_categories and isinstance(content_categories, dict):
         total_weight = sum(content_categories.values())
         if not (0.99 <= total_weight <= 1.01):
             errors.append(

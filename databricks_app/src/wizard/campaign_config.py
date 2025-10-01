@@ -1,7 +1,7 @@
 """Campaign configuration wizard step."""
 
 import streamlit as st
-from databricks_app.src.wizard.validation import validate_campaign_config
+from src.wizard.validation import validate_campaign_config
 
 
 def render_campaign_config():

@@ -1,7 +1,61 @@
 """Demographics configuration wizard step."""
 
 import streamlit as st
-from databricks_app.src.wizard.validation import validate_demographics_config
+from src.wizard.validation import validate_demographics_config
+
+
+def auto_adjust_distribution(categories, config_dict, prev_key, slider_key_prefix):
+    """Auto-adjust distribution sliders to maintain sum of 1.0.
+
+    Args:
+        categories: List of category names
+        config_dict: Current config dictionary
+        prev_key: Session state key for previous values
+        slider_key_prefix: Prefix for slider keys
+
+    Returns:
+        Dictionary of adjusted values
+    """
+    # Initialize previous values in session state if not exists
+    if prev_key not in st.session_state:
+        st.session_state[prev_key] = config_dict.copy()
+
+    # Create sliders and collect values
+    values = {}
+    for category in categories:
+        values[category] = st.slider(
+            f"**{category}**",
+            min_value=0.0,
+            max_value=1.0,
+            value=config_dict.get(category, 1.0 / len(categories)),
+            step=0.01,
+            key=f"{slider_key_prefix}_{category}"
+        )
+
+    # Detect which slider changed
+    changed_category = None
+    for category in categories:
+        if abs(values[category] - st.session_state[prev_key].get(category, 1.0 / len(categories))) > 0.001:
+            changed_category = category
+            break
+
+    # Auto-adjust other sliders to maintain sum of 1.0
+    if changed_category:
+        other_categories = [c for c in categories if c != changed_category]
+        old_total_others = sum(st.session_state[prev_key].get(c, 1.0 / len(categories)) for c in other_categories)
+        new_total_others = 1.0 - values[changed_category]
+
+        if old_total_others > 0 and new_total_others >= 0:
+            # Proportionally redistribute
+            for category in other_categories:
+                old_value = st.session_state[prev_key].get(category, 1.0 / len(categories))
+                proportion = old_value / old_total_others if old_total_others > 0 else 1.0 / len(other_categories)
+                values[category] = round(new_total_others * proportion, 2)
+
+        # Update previous values
+        st.session_state[prev_key] = values.copy()
+
+    return values
 
 
 def render_demographics_config():
@@ -72,27 +126,17 @@ def render_demographics_config():
 
     # Gender distribution
     st.subheader("Gender Distribution")
-    st.markdown("Adjust gender distribution (must sum to 1.0)")
+    st.markdown("Adjust gender distribution (automatically adjusts others to maintain 1.0 sum)")
 
     genders = ["Male", "Female", "Non-Binary", "Prefer not to say"]
     gender_config = config.get("gender_distribution", {})
 
-    gender_values = {}
-    for gender in genders:
-        gender_values[gender] = st.slider(
-            f"**{gender}**",
-            min_value=0.0,
-            max_value=1.0,
-            value=gender_config.get(gender, 0.25),
-            step=0.01,
-            key=f"gender_{gender}"
-        )
+    gender_values = auto_adjust_distribution(
+        genders, gender_config, "prev_gender_dist", "gender"
+    )
 
     total_gender = sum(gender_values.values())
-    if abs(total_gender - 1.0) > 0.01:
-        st.warning(f"⚠️ Gender distribution sums to {total_gender:.2f}, but must equal 1.0")
-    else:
-        st.success(f"✅ Gender distribution sums to {total_gender:.2f}")
+    st.success(f"✅ Gender distribution sums to {total_gender:.2f}")
 
     config["gender_distribution"] = gender_values
 
@@ -100,26 +144,17 @@ def render_demographics_config():
 
     # Education distribution
     st.subheader("Education Distribution")
+    st.markdown("Adjust education distribution (automatically adjusts others to maintain 1.0 sum)")
 
     education_levels = ["High School", "Some College", "Bachelor", "Master", "Doctorate"]
     education_config = config.get("education_distribution", {})
 
-    education_values = {}
-    for level in education_levels:
-        education_values[level] = st.slider(
-            f"**{level}**",
-            min_value=0.0,
-            max_value=1.0,
-            value=education_config.get(level, 0.2),
-            step=0.01,
-            key=f"education_{level}"
-        )
+    education_values = auto_adjust_distribution(
+        education_levels, education_config, "prev_education_dist", "education"
+    )
 
     total_education = sum(education_values.values())
-    if abs(total_education - 1.0) > 0.01:
-        st.warning(f"⚠️ Education distribution sums to {total_education:.2f}, but must equal 1.0")
-    else:
-        st.success(f"✅ Education distribution sums to {total_education:.2f}")
+    st.success(f"✅ Education distribution sums to {total_education:.2f}")
 
     config["education_distribution"] = education_values
 

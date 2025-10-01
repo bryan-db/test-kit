@@ -11,7 +11,7 @@ from pyspark.sql.functions import (
     unix_timestamp, broadcast
 )
 from pyspark.sql.window import Window
-from databricks_app.src.models.schemas import CampaignConfig
+from src.models.schemas import CampaignConfig
 import pandas as pd
 from pyspark.sql.functions import pandas_udf
 

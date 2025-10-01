@@ -23,7 +23,7 @@ import pandas as pd
 from faker import Faker
 import dbldatagen as dg
 
-from databricks_app.src.models.schemas import DemographicsConfig
+from src.models.schemas import DemographicsConfig
 
 
 def generate_individuals(

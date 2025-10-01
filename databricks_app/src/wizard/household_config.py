@@ -1,7 +1,7 @@
 """Household configuration wizard step."""
 
 import streamlit as st
-from databricks_app.src.wizard.validation import validate_household_config
+from src.wizard.validation import validate_household_config
 
 
 def render_household_config():
@@ -70,10 +70,14 @@ def render_household_config():
 
     # Income bracket distribution
     st.subheader("Income Bracket Distribution")
-    st.markdown("Adjust the distribution of household income brackets (must sum to 1.0)")
+    st.markdown("Adjust the distribution of household income brackets (automatically adjusts others to maintain 1.0 sum)")
 
     brackets = ["<30K", "30-60K", "60-100K", "100-150K", "150K+"]
     income_config = config.get("income_brackets", {})
+
+    # Initialize previous values in session state if not exists
+    if "prev_income_brackets" not in st.session_state:
+        st.session_state.prev_income_brackets = income_config.copy()
 
     # Create sliders for each bracket
     income_values = {}
@@ -87,12 +91,32 @@ def render_household_config():
             key=f"income_{bracket}"
         )
 
+    # Detect which slider changed and auto-adjust others
+    changed_bracket = None
+    for bracket in brackets:
+        if abs(income_values[bracket] - st.session_state.prev_income_brackets.get(bracket, 0.2)) > 0.001:
+            changed_bracket = bracket
+            break
+
+    # Auto-adjust other sliders to maintain sum of 1.0
+    if changed_bracket:
+        other_brackets = [b for b in brackets if b != changed_bracket]
+        old_total_others = sum(st.session_state.prev_income_brackets.get(b, 0.2) for b in other_brackets)
+        new_total_others = 1.0 - income_values[changed_bracket]
+
+        if old_total_others > 0 and new_total_others >= 0:
+            # Proportionally redistribute
+            for bracket in other_brackets:
+                old_value = st.session_state.prev_income_brackets.get(bracket, 0.2)
+                proportion = old_value / old_total_others if old_total_others > 0 else 1.0 / len(other_brackets)
+                income_values[bracket] = round(new_total_others * proportion, 2)
+
+        # Update previous values
+        st.session_state.prev_income_brackets = income_values.copy()
+
     # Check if sum equals 1.0
     total = sum(income_values.values())
-    if abs(total - 1.0) > 0.01:
-        st.warning(f"⚠️ Income brackets sum to {total:.2f}, but must equal 1.0")
-    else:
-        st.success(f"✅ Income brackets sum to {total:.2f}")
+    st.success(f"✅ Income brackets sum to {total:.2f}")
 
     config["income_brackets"] = income_values
 

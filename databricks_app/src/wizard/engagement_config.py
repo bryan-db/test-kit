@@ -1,7 +1,45 @@
 """Engagement configuration wizard step."""
 
 import streamlit as st
-from databricks_app.src.wizard.validation import validate_engagement_config
+from src.wizard.validation import validate_engagement_config
+
+
+def auto_adjust_distribution(categories, config_dict, prev_key, slider_key_prefix):
+    """Auto-adjust distribution sliders to maintain sum of 1.0."""
+    if prev_key not in st.session_state:
+        st.session_state[prev_key] = config_dict.copy()
+
+    values = {}
+    for category in categories:
+        values[category] = st.slider(
+            f"**{category.capitalize()}**",
+            min_value=0.0,
+            max_value=1.0,
+            value=config_dict.get(category, 1.0 / len(categories)),
+            step=0.01,
+            key=f"{slider_key_prefix}_{category}"
+        )
+
+    changed_category = None
+    for category in categories:
+        if abs(values[category] - st.session_state[prev_key].get(category, 1.0 / len(categories))) > 0.001:
+            changed_category = category
+            break
+
+    if changed_category:
+        other_categories = [c for c in categories if c != changed_category]
+        old_total_others = sum(st.session_state[prev_key].get(c, 1.0 / len(categories)) for c in other_categories)
+        new_total_others = 1.0 - values[changed_category]
+
+        if old_total_others > 0 and new_total_others >= 0:
+            for category in other_categories:
+                old_value = st.session_state[prev_key].get(category, 1.0 / len(categories))
+                proportion = old_value / old_total_others if old_total_others > 0 else 1.0 / len(other_categories)
+                values[category] = round(new_total_others * proportion, 2)
+
+        st.session_state[prev_key] = values.copy()
+
+    return values
 
 
 def render_engagement_config():
@@ -89,27 +127,17 @@ def render_engagement_config():
 
     # Engagement type distribution
     st.subheader("Engagement Type Distribution")
-    st.markdown("Distribution of engagement types (must sum to 1.0)")
+    st.markdown("Distribution of engagement types (automatically adjusts others to maintain 1.0 sum)")
 
     engagement_types = ["view", "click", "share", "like", "comment"]
     engagement_config = config.get("engagement_types", {})
 
-    engagement_values = {}
-    for eng_type in engagement_types:
-        engagement_values[eng_type] = st.slider(
-            f"**{eng_type.capitalize()}**",
-            min_value=0.0,
-            max_value=1.0,
-            value=engagement_config.get(eng_type, 0.2),
-            step=0.01,
-            key=f"engagement_{eng_type}"
-        )
+    engagement_values = auto_adjust_distribution(
+        engagement_types, engagement_config, "prev_engagement_types", "engagement"
+    )
 
     total_engagement = sum(engagement_values.values())
-    if abs(total_engagement - 1.0) > 0.01:
-        st.warning(f"⚠️ Engagement types sum to {total_engagement:.2f}, but must equal 1.0")
-    else:
-        st.success(f"✅ Engagement types sum to {total_engagement:.2f}")
+    st.success(f"✅ Engagement types sum to {total_engagement:.2f}")
 
     config["engagement_types"] = engagement_values
 

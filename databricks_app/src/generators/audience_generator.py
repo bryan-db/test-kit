@@ -14,7 +14,7 @@ from pyspark.sql.functions import (
     sort_array, slice as spark_slice, hour, approx_percentile, rand
 )
 from pyspark.sql.window import Window
-from databricks_app.src.models.schemas import AudienceConfig
+from src.models.schemas import AudienceConfig
 
 
 def derive_viewership_patterns_and_audience_attributes(

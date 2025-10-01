@@ -8,20 +8,20 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 from pyspark.sql import SparkSession, DataFrame
 
-from databricks_app.src.models.schemas import GenerationConfig
-from databricks_app.src.generators.household_generator import generate_households
-from databricks_app.src.generators.individual_generator import (
+from src.models.schemas import GenerationConfig
+from src.generators.household_generator import generate_households
+from src.generators.individual_generator import (
     generate_individuals_and_identities,
 )
-from databricks_app.src.generators.engagement_generator import generate_content_engagements
-from databricks_app.src.generators.audience_generator import (
+from src.generators.engagement_generator import generate_content_engagements
+from src.generators.audience_generator import (
     derive_viewership_patterns_and_audience_attributes,
 )
-from databricks_app.src.generators.campaign_generator import (
+from src.generators.campaign_generator import (
     generate_campaigns,
     generate_campaign_exposures,
 )
-from databricks_app.src.generators.response_generator import (
+from src.generators.response_generator import (
     generate_response_events_and_outcomes,
 )
 
@@ -90,7 +90,7 @@ def execute_full_pipeline(
 
         # Phase 1: Check permissions (if write_to_catalog)
         if write_to_catalog:
-            from databricks_app.src.utils.auth import verify_catalog_permissions
+            from src.utils.auth import verify_catalog_permissions
 
             has_perms, missing = verify_catalog_permissions(
                 catalog_name=config.catalog_name,
@@ -177,7 +177,7 @@ def execute_full_pipeline(
 
         # Write to Unity Catalog if requested
         if write_to_catalog:
-            from databricks_app.src.storage.catalog_writer import CatalogWriter
+            from src.storage.catalog_writer import CatalogWriter
 
             writer = CatalogWriter(spark)
 

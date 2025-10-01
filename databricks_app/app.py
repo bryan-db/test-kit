@@ -45,88 +45,232 @@ def apply_md3_styling():
     st.markdown(
         f"""
         <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
         /* Material Design 3 Custom Theme */
         .stApp {{
-            background-color: {MD3_COLORS['background']};
+            background: linear-gradient(135deg, {MD3_COLORS['background']} 0%, #F5F5F5 100%);
             color: {MD3_COLORS['on_background']};
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }}
 
-        /* Headers */
-        h1, h2, h3 {{
-            color: {MD3_COLORS['on_background']};
+        /* Material Design 3 Typography Scale */
+        h1 {{
             font-family: 'Roboto', sans-serif;
+            font-size: 57px;
+            font-weight: 400;
+            line-height: 64px;
+            letter-spacing: -0.25px;
+            color: {MD3_COLORS['on_background']};
+            margin-bottom: 16px;
         }}
 
-        /* Primary buttons */
+        h2 {{
+            font-family: 'Roboto', sans-serif;
+            font-size: 45px;
+            font-weight: 400;
+            line-height: 52px;
+            color: {MD3_COLORS['on_background']};
+            margin-bottom: 12px;
+        }}
+
+        h3 {{
+            font-family: 'Roboto', sans-serif;
+            font-size: 36px;
+            font-weight: 400;
+            line-height: 44px;
+            color: {MD3_COLORS['on_background']};
+            margin-bottom: 8px;
+        }}
+
+        /* Material Design 3 Elevated Buttons */
         .stButton > button {{
             background-color: {MD3_COLORS['primary']};
             color: {MD3_COLORS['on_primary']};
-            border-radius: 20px;
+            border-radius: 100px;
             border: none;
             padding: 10px 24px;
             font-weight: 500;
-            transition: all 0.3s;
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: 0.1px;
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3),
+                        0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: none;
         }}
 
         .stButton > button:hover {{
-            background-color: {MD3_COLORS['primary_container']};
-            color: {MD3_COLORS['on_primary_container']};
-            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+            background-color: {MD3_COLORS['primary']};
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3),
+                        0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
         }}
 
-        /* Secondary buttons */
-        .stButton > button[kind="secondary"] {{
-            background-color: {MD3_COLORS['secondary_container']};
-            color: {MD3_COLORS['on_secondary_container']};
+        .stButton > button:active {{
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3),
+                        0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+            transform: translateY(0);
         }}
 
-        /* Input fields */
+        /* Filled Text Fields */
         .stTextInput > div > div > input,
         .stNumberInput > div > div > input,
         .stSelectbox > div > div > select {{
-            border: 1px solid {MD3_COLORS['outline']};
-            border-radius: 4px;
-            background-color: {MD3_COLORS['surface']};
+            background-color: {MD3_COLORS['surface_variant']};
+            border: none;
+            border-bottom: 1px solid {MD3_COLORS['outline']};
+            border-radius: 4px 4px 0 0;
+            padding: 16px 12px 8px;
             color: {MD3_COLORS['on_surface']};
+            font-size: 16px;
+            transition: all 0.2s ease;
         }}
 
-        /* Sliders */
+        .stTextInput > div > div > input:focus,
+        .stNumberInput > div > div > input:focus,
+        .stSelectbox > div > div > select:focus {{
+            border-bottom: 2px solid {MD3_COLORS['primary']};
+            background-color: {MD3_COLORS['surface_variant']};
+            outline: none;
+        }}
+
+        /* Material Design 3 Sliders */
         .stSlider > div > div > div > div {{
             background-color: {MD3_COLORS['primary']};
         }}
 
-        /* Cards */
-        .stContainer {{
+        .stSlider [role="slider"] {{
+            background-color: {MD3_COLORS['primary']};
+            box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.4);
+        }}
+
+        /* Material Design 3 Cards with Elevation */
+        [data-testid="stVerticalBlock"] > [style*="flex-direction: column"] > [data-testid="stVerticalBlock"] {{
             background-color: {MD3_COLORS['surface']};
             border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+            padding: 24px;
+            margin: 8px 0;
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3),
+                        0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+            transition: box-shadow 0.2s ease;
         }}
 
-        /* Progress bar */
+        /* Progress Indicator */
         .stProgress > div > div > div > div {{
             background-color: {MD3_COLORS['primary']};
+            border-radius: 4px;
         }}
 
-        /* Success messages */
+        .stProgress > div > div > div {{
+            background-color: {MD3_COLORS['surface_variant']};
+            border-radius: 4px;
+        }}
+
+        /* Alert/Message Components */
         .stSuccess {{
-            background-color: {MD3_COLORS['tertiary_container']};
-            color: {MD3_COLORS['on_tertiary_container']};
+            background-color: {MD3_COLORS['tertiary_container']} !important;
+            color: {MD3_COLORS['on_tertiary_container']} !important;
             border-radius: 12px;
+            border: none;
+            padding: 16px;
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3),
+                        0px 1px 3px 1px rgba(0, 0, 0, 0.15);
         }}
 
-        /* Error messages */
         .stError {{
-            background-color: {MD3_COLORS['error_container']};
-            color: {MD3_COLORS['on_error_container']};
+            background-color: {MD3_COLORS['error_container']} !important;
+            color: {MD3_COLORS['on_error_container']} !important;
             border-radius: 12px;
+            border: none;
+            padding: 16px;
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3),
+                        0px 1px 3px 1px rgba(0, 0, 0, 0.15);
         }}
 
-        /* Info messages */
         .stInfo {{
-            background-color: {MD3_COLORS['primary_container']};
-            color: {MD3_COLORS['on_primary_container']};
+            background-color: {MD3_COLORS['primary_container']} !important;
+            color: {MD3_COLORS['on_primary_container']} !important;
             border-radius: 12px;
+            border: none;
+            padding: 16px;
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3),
+                        0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+        }}
+
+        .stWarning {{
+            background-color: #FFF4E5 !important;
+            color: #6B4C00 !important;
+            border-radius: 12px;
+            border: none;
+            padding: 16px;
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3),
+                        0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+        }}
+
+        /* Divider */
+        hr {{
+            border: none;
+            border-top: 1px solid {MD3_COLORS['outline']};
+            margin: 24px 0;
+        }}
+
+        /* Multiselect */
+        .stMultiSelect > div > div {{
+            background-color: {MD3_COLORS['surface_variant']};
+            border-radius: 4px;
+            border: 1px solid {MD3_COLORS['outline']};
+        }}
+
+        /* Radio buttons */
+        .stRadio > div {{
+            gap: 8px;
+        }}
+
+        .stRadio > div > label {{
+            background-color: {MD3_COLORS['surface_variant']};
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }}
+
+        .stRadio > div > label:hover {{
+            background-color: {MD3_COLORS['primary_container']};
+        }}
+
+        /* Checkbox */
+        .stCheckbox {{
+            padding: 8px;
+        }}
+
+        /* Selectbox dropdown */
+        [data-baseweb="select"] {{
+            border-radius: 4px;
+        }}
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {{
+            width: 8px;
+            height: 8px;
+        }}
+
+        ::-webkit-scrollbar-track {{
+            background: {MD3_COLORS['surface_variant']};
+            border-radius: 4px;
+        }}
+
+        ::-webkit-scrollbar-thumb {{
+            background: {MD3_COLORS['outline']};
+            border-radius: 4px;
+        }}
+
+        ::-webkit-scrollbar-thumb:hover {{
+            background: {MD3_COLORS['primary']};
+        }}
+
+        /* Animated transitions */
+        * {{
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
         }}
         </style>
         """,
@@ -200,18 +344,67 @@ def render_progress_indicator():
     current_step = st.session_state.wizard_step
     progress = (current_step + 1) / len(steps)
 
+    # Material Design 3 progress bar
     st.progress(progress)
 
-    # Step indicator
+    # Material Design 3 step indicator with cards
+    st.markdown(
+        """
+        <style>
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .step-card {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .step-completed {
+            background-color: #EADDFF;
+            color: #21005D;
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.3);
+        }
+        .step-active {
+            background-color: #6750A4;
+            color: #FFFFFF;
+            box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.4),
+                        0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+        }
+        .step-pending {
+            background-color: #F5F5F5;
+            color: #6B6B6B;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Step cards
     cols = st.columns(len(steps))
     for idx, (col, step_name) in enumerate(zip(cols, steps)):
         with col:
             if idx < current_step:
-                st.markdown(f"✅ **{step_name}**")
+                st.markdown(
+                    f'<div class="step-card step-completed">✓ {step_name}</div>',
+                    unsafe_allow_html=True
+                )
             elif idx == current_step:
-                st.markdown(f"🔵 **{step_name}**")
+                st.markdown(
+                    f'<div class="step-card step-active">{step_name}</div>',
+                    unsafe_allow_html=True
+                )
             else:
-                st.markdown(f"⚪ {step_name}")
+                st.markdown(
+                    f'<div class="step-card step-pending">{step_name}</div>',
+                    unsafe_allow_html=True
+                )
 
 
 def next_step():
@@ -264,23 +457,23 @@ def main():
     current_step = st.session_state.wizard_step
 
     if current_step == 0:
-        from databricks_app.src.wizard.household_config import render_household_config
+        from src.wizard.household_config import render_household_config
         render_household_config()
 
     elif current_step == 1:
-        from databricks_app.src.wizard.demographics_config import render_demographics_config
+        from src.wizard.demographics_config import render_demographics_config
         render_demographics_config()
 
     elif current_step == 2:
-        from databricks_app.src.wizard.engagement_config import render_engagement_config
+        from src.wizard.engagement_config import render_engagement_config
         render_engagement_config()
 
     elif current_step == 3:
-        from databricks_app.src.wizard.campaign_config import render_campaign_config
+        from src.wizard.campaign_config import render_campaign_config
         render_campaign_config()
 
     elif current_step == 4:
-        from databricks_app.src.wizard.review_submit import render_review_submit
+        from src.wizard.review_submit import render_review_submit
         render_review_submit()
 
     # Navigation footer

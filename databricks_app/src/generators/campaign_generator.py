@@ -13,7 +13,7 @@ from pyspark.sql.functions import (
     date_add, to_date, current_timestamp, array, broadcast, monotonically_increasing_id
 )
 from pyspark.sql.window import Window
-from databricks_app.src.models.schemas import CampaignConfig
+from src.models.schemas import CampaignConfig
 import pandas as pd
 from pyspark.sql.functions import pandas_udf
 

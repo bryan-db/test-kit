@@ -1,6 +1,6 @@
 """Wizard UI components and validation for the Synthetic Identity Graph Dataset Generator."""
 
-from databricks_app.src.wizard.validation import (
+from src.wizard.validation import (
     validate_household_config,
     validate_demographics_config,
     validate_engagement_config,

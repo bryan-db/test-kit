@@ -1,6 +1,6 @@
 """Data models and schemas for the Synthetic Identity Graph Dataset Generator."""
 
-from databricks_app.src.models.schemas import (
+from src.models.schemas import (
     WizardStep,
     SessionState,
     GenerationConfig,

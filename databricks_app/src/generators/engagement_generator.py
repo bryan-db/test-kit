@@ -17,7 +17,7 @@ from pyspark.sql.functions import (
 )
 import dbldatagen as dg
 
-from databricks_app.src.models.schemas import EngagementConfig
+from src.models.schemas import EngagementConfig
 
 
 def generate_content_engagements(

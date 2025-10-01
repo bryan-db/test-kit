@@ -152,7 +152,7 @@ def submit_generation_job(
         # Step 1: Check permissions
         st.info("🔐 Checking Unity Catalog permissions...")
 
-        from databricks_app.src.utils.auth import verify_catalog_permissions
+        from src.utils.auth import verify_catalog_permissions
 
         has_perms, missing = verify_catalog_permissions(
             catalog_name=catalog_name,
@@ -161,7 +161,7 @@ def submit_generation_job(
         )
 
         if not has_perms:
-            from databricks_app.src.utils.auth import format_permission_error
+            from src.utils.auth import format_permission_error
 
             error_msg = format_permission_error(
                 catalog_name=catalog_name,
@@ -253,7 +253,7 @@ def submit_generation_job(
 
 def display_job_progress():
     """Display job progress with polling."""
-    from databricks_app.src.utils.progress import poll_job_status, format_status_message, format_duration
+    from src.utils.progress import poll_job_status, format_status_message, format_duration
 
     job_id = st.session_state.get("job_id")
 
