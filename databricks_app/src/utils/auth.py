@@ -44,21 +44,16 @@ def verify_catalog_permissions(
         w = WorkspaceClient()
 
         # Get current user if not specified
-        if user_principal is None:
+        if user_principal is None or user_principal == "current_user":
             try:
                 current_user = w.current_user.me()
-                # Handle both string and object emails
-                if current_user.user_name:
-                    user_principal = current_user.user_name
-                elif current_user.emails and len(current_user.emails) > 0:
-                    email = current_user.emails[0]
-                    user_principal = email.value if hasattr(email, 'value') else str(email)
-                else:
-                    user_principal = "unknown"
+                user_principal = current_user.user_name
                 print(f"DEBUG: Detected user principal: {user_principal}")
             except Exception as e:
                 print(f"Warning: Could not detect current user: {e}")
-                user_principal = "unknown"
+                import traceback
+                traceback.print_exc()
+                user_principal = None
 
         # Check catalog permissions
         print(f"DEBUG: Checking catalog permissions for '{catalog_name}' (user: {user_principal})")
