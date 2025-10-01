@@ -116,10 +116,25 @@ export class DatabricksJobsClient {
       throw new Error('Feature 001 Job ID not configured. Please set VITE_FEATURE_001_JOB_ID in .env file.');
     }
 
+    // Transform React config structure to match notebook expectations
+    // React uses: household, demographics, engagement, campaign, output
+    // Notebook expects: household_config, demographics_config, etc.
+    const notebookConfig = {
+      seed: config.output?.seed || 42,
+      catalog_name: config.output?.catalog || 'bryan_li',
+      schema_name: config.output?.schema || 'synthetic_data',
+      household_config: config.household || {},
+      demographics_config: config.demographics || {},
+      engagement_config: config.engagement || {},
+      campaign_config: config.campaign || {},
+    };
+
+    console.log('Transformed config for notebook:', notebookConfig);
+
     const payload = {
       job_id: parseInt(jobId),
       notebook_params: {
-        config: JSON.stringify(config),
+        config: JSON.stringify(notebookConfig),
       },
     };
 
