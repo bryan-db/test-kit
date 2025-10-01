@@ -300,15 +300,17 @@
   - ✅ Return `ValidationResult` with errors/warnings list
   - ✅ Display validation errors in UI with clear messages
 
-## Phase 3.7: Integration & Orchestration
+## Phase 3.7: Integration & Orchestration ✅ COMPLETE
 
-- [ ] **T036**: Wire generators to wizard in `databricks_app/app.py`
-  - Create review/submit step displaying full configuration summary
-  - Add random seed input for deterministic generation (default random)
-  - Add catalog/schema inputs (default bryan_li.synthetic_data)
-  - Implement permission check on "Generate Dataset" button click (call `verify_catalog_permissions()`)
-  - Display permission error if insufficient privileges
-  - If permissions OK, submit Databricks Job with generation notebook
+- [x] **T036**: Wire generators to wizard in `databricks_app/app.py`
+  - ✅ Create review/submit step displaying full configuration summary
+  - ✅ Add random seed input for deterministic generation (default random)
+  - ✅ Add catalog/schema inputs (default bryan_li.synthetic_data)
+  - ✅ Implement permission check on "Generate Dataset" button click (call `verify_catalog_permissions()`)
+  - ✅ Display permission error if insufficient privileges
+  - ✅ If permissions OK, submit Databricks Job with generation notebook
+  - ✅ Display job progress with auto-refresh
+  - ✅ Show estimated output metrics
 
 - [x] **T037**: Create generation notebook in `databricks_app/generation_notebook.py`
   - ✅ Parse config_json from job parameters (passed by wizard)

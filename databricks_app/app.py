@@ -280,18 +280,8 @@ def main():
         render_campaign_config()
 
     elif current_step == 4:
-        # Review and submit step (implemented in T036)
-        st.header("📋 Review Configuration")
-        st.json(st.session_state.config)
-
-        st.info("⚠️ Generation submission not yet implemented (Task T036)")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("⬅️ Previous", key="prev_final"):
-                previous_step()
-        with col2:
-            st.button("🚀 Generate Dataset", disabled=True, key="generate")
+        from databricks_app.src.wizard.review_submit import render_review_submit
+        render_review_submit()
 
     # Navigation footer
     st.divider()
