@@ -5,7 +5,7 @@
       "task_key": "generate_synthetic_data",
       "description": "Execute synthetic data generation pipeline with wizard configuration",
       "notebook_task": {
-        "notebook_path": "/Workspace/Users/bryan.li@databricks.com/test-kit/databricks_app/generation_notebook",
+        "notebook_path": "/Repos/bryan.li@databricks.com/test-kit/databricks_app/generation_notebook",
         "base_parameters": {
           "config_json": "{}"
         }
@@ -14,6 +14,12 @@
         "spark_version": "14.3.x-scala2.12",
         "node_type_id": "m5.4xlarge",
         "num_workers": 8,
+        "aws_attributes": {
+          "availability": "SPOT_WITH_FALLBACK",
+          "ebs_volume_type": "GENERAL_PURPOSE_SSD",
+          "ebs_volume_count": 1,
+          "ebs_volume_size": 100
+        },
         "spark_conf": {
           "spark.databricks.delta.optimizeWrite.enabled": "true",
           "spark.databricks.delta.autoCompact.enabled": "true",
