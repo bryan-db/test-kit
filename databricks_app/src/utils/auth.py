@@ -6,6 +6,7 @@ data generation to prevent wasted compute on permission failures.
 
 from typing import Tuple, List
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.catalog import SecurableType
 
 
 def verify_catalog_permissions(
@@ -59,7 +60,7 @@ def verify_catalog_permissions(
         print(f"DEBUG: Checking catalog permissions for '{catalog_name}' (user: {user_principal})")
         try:
             catalog_grants = w.grants.get(
-                securable_type="catalog",
+                securable_type=SecurableType.CATALOG,
                 full_name=catalog_name,
             )
 
@@ -104,7 +105,7 @@ def verify_catalog_permissions(
             # Check schema permissions
             try:
                 schema_grants = w.grants.get(
-                    securable_type="schema",
+                    securable_type=SecurableType.SCHEMA,
                     full_name=f"{catalog_name}.{schema_name}",
                 )
 
