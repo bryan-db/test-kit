@@ -5,7 +5,7 @@
       "task_key": "generate_synthetic_data",
       "description": "Execute synthetic data generation pipeline with wizard configuration",
       "notebook_task": {
-        "notebook_path": "/Repos/bryan.li@databricks.com/test-kit/databricks_app/generation_notebook.py",
+        "notebook_path": "/Repos/bryan.li@databricks.com/test-kit/databricks_app/generation_notebook",
         "base_parameters": {
           "config": "{}"
         },
