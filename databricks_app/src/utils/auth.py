@@ -47,12 +47,21 @@ def verify_catalog_permissions(
         if user_principal is None:
             try:
                 current_user = w.current_user.me()
-                user_principal = current_user.user_name or current_user.emails[0].value
+                # Handle both string and object emails
+                if current_user.user_name:
+                    user_principal = current_user.user_name
+                elif current_user.emails and len(current_user.emails) > 0:
+                    email = current_user.emails[0]
+                    user_principal = email.value if hasattr(email, 'value') else str(email)
+                else:
+                    user_principal = "unknown"
+                print(f"DEBUG: Detected user principal: {user_principal}")
             except Exception as e:
                 print(f"Warning: Could not detect current user: {e}")
                 user_principal = "unknown"
 
         # Check catalog permissions
+        print(f"DEBUG: Checking catalog permissions for '{catalog_name}' (user: {user_principal})")
         try:
             catalog_grants = w.grants.get(
                 securable_type="catalog",
@@ -61,29 +70,40 @@ def verify_catalog_permissions(
 
             has_use_catalog = False
             if catalog_grants and catalog_grants.privilege_assignments:
+                print(f"DEBUG: Found {len(catalog_grants.privilege_assignments)} privilege assignments for catalog")
                 for assignment in catalog_grants.privilege_assignments:
+                    print(f"DEBUG: Assignment for principal '{assignment.principal}'")
                     if assignment.principal == user_principal:
                         # Convert privileges to strings (they might be enum objects)
                         privileges = [str(p).replace('Privilege.', '') if hasattr(p, 'value') else str(p) for p in (assignment.privileges or [])]
+                        print(f"DEBUG: User privileges on catalog: {privileges}")
                         if "USE_CATALOG" in privileges:
                             has_use_catalog = True
+            else:
+                print(f"DEBUG: No privilege assignments found for catalog '{catalog_name}'")
 
             if not has_use_catalog:
                 missing_privileges.append("USE_CATALOG")
 
         except Exception as e:
             print(f"Warning: Could not check catalog permissions: {e}")
+            import traceback
+            traceback.print_exc()
             missing_privileges.append("USE_CATALOG")
 
         # Check schema existence and permissions
+        print(f"DEBUG: Checking schema permissions for '{catalog_name}.{schema_name}'")
         try:
             schema_info = w.schemas.get(full_name=f"{catalog_name}.{schema_name}")
             schema_exists = True
-        except Exception:
+            print(f"DEBUG: Schema '{catalog_name}.{schema_name}' exists")
+        except Exception as e:
             schema_exists = False
+            print(f"DEBUG: Schema '{catalog_name}.{schema_name}' does not exist: {e}")
 
         if not schema_exists and create_if_missing:
             # Need CREATE SCHEMA permission
+            print(f"DEBUG: Schema does not exist, need CREATE_SCHEMA permission")
             missing_privileges.append("CREATE_SCHEMA")
         elif schema_exists:
             # Check schema permissions
@@ -97,14 +117,19 @@ def verify_catalog_permissions(
                 has_create_table = False
 
                 if schema_grants and schema_grants.privilege_assignments:
+                    print(f"DEBUG: Found {len(schema_grants.privilege_assignments)} privilege assignments for schema")
                     for assignment in schema_grants.privilege_assignments:
+                        print(f"DEBUG: Assignment for principal '{assignment.principal}'")
                         if assignment.principal == user_principal:
                             # Convert privileges to strings (they might be enum objects)
                             privileges = [str(p).replace('Privilege.', '') if hasattr(p, 'value') else str(p) for p in (assignment.privileges or [])]
+                            print(f"DEBUG: User privileges on schema: {privileges}")
                             if "USE_SCHEMA" in privileges or "USE SCHEMA" in privileges:
                                 has_use_schema = True
                             if "CREATE_TABLE" in privileges or "CREATE TABLE" in privileges:
                                 has_create_table = True
+                else:
+                    print(f"DEBUG: No privilege assignments found for schema '{catalog_name}.{schema_name}'")
 
                 if not has_use_schema:
                     missing_privileges.append("USE_SCHEMA")
@@ -113,6 +138,8 @@ def verify_catalog_permissions(
 
             except Exception as e:
                 print(f"Warning: Could not check schema permissions: {e}")
+                import traceback
+                traceback.print_exc()
                 missing_privileges.extend(["USE_SCHEMA", "CREATE_TABLE"])
 
     except Exception as e:

@@ -92,6 +92,7 @@ def execute_full_pipeline(
         if write_to_catalog:
             from src.utils.auth import verify_catalog_permissions
 
+            print(f"[PIPELINE] Checking permissions for catalog='{config.catalog_name}', schema='{config.schema_name}'")
             has_perms, missing = verify_catalog_permissions(
                 catalog_name=config.catalog_name,
                 schema_name=config.schema_name,
@@ -99,22 +100,27 @@ def execute_full_pipeline(
             )
 
             if not has_perms:
+                error_msg = f"Missing permissions: {', '.join(missing)}. Required: USE_CATALOG, USE_SCHEMA, CREATE_TABLE"
+                print(f"[PIPELINE] Permission check FAILED: {error_msg}")
                 return {
                     "status": "failed",
-                    "error": f"Missing permissions: {', '.join(missing)}. "
-                    f"Required: USE_CATALOG, USE_SCHEMA, CREATE_TABLE",
+                    "error": error_msg,
                     "tables_created": [],
                     "row_counts": {},
                     "dataframes": {},
                 }
+            print(f"[PIPELINE] Permission check PASSED for {config.catalog_name}.{config.schema_name}")
 
         # Phase 2: Generate households
+        print(f"[PIPELINE] Phase 2: Generating {config.household_config.num_households} households...")
         households_df = generate_households(
             spark, config.household_config, seed=config.seed
         )
         result["dataframes"]["households"] = households_df
-        result["row_counts"]["households"] = households_df.count()
+        household_count = households_df.count()
+        result["row_counts"]["households"] = household_count
         result["tables_created"].append("households")
+        print(f"[PIPELINE] Phase 2 COMPLETE: Generated {household_count} households")
 
         # Phase 3: Generate individuals and identity mappings
         individuals_df, identity_mappings_df = generate_individuals_and_identities(
