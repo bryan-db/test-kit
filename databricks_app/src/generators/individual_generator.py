@@ -276,7 +276,7 @@ def generate_identity_mappings(
 
     # Assign to individuals using row_number matching
     from pyspark.sql.window import Window
-    from pyspark.sql.functions import row_number, when
+    from pyspark.sql.functions import row_number
 
     mappings_base = mappings_base.withColumn(
         "row_num", row_number().over(Window.orderBy("individual_id", "identifier_index"))
