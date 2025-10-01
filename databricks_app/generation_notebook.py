@@ -186,6 +186,21 @@ def execute_generation_pipeline(
         campaign_duration_days=campaign_cfg.get("campaign_duration_days", {"min": 7, "max": 30})
     )
 
+    # Transform audience config
+    audience_cfg = config.get("audience_config", {})
+    audience_config = AudienceConfig(
+        segments=audience_cfg.get("segments", [
+            "Tech Enthusiast", "Sports Fan", "News Junkie",
+            "Entertainment Seeker", "Casual User"
+        ]),
+        affinity_threshold=audience_cfg.get("affinity_threshold", 0.5),
+        behavioral_classifications=audience_cfg.get("behavioral_classifications", [
+            "Heavy User", "Moderate User", "Light User"
+        ]),
+        recency_weight=audience_cfg.get("recency_weight", 0.3),
+        frequency_weight=audience_cfg.get("frequency_weight", 0.7)
+    )
+
     # Convert dict to typed config objects
     generation_config = GenerationConfig(
         seed=config.get("seed", 42),
@@ -194,15 +209,7 @@ def execute_generation_pipeline(
         household_config=household_config,
         demographics_config=demographics_config,
         engagement_config=engagement_config,
-        audience_config=AudienceConfig(**config.get("audience_config", {
-            "segments": ["Tech Enthusiast", "Sports Fan", "News Junkie",
-                        "Entertainment Seeker", "Casual User"],
-            "behavioral_thresholds": {
-                "heavy_user_min_daily": 10.0,
-                "moderate_user_min_daily": 2.0,
-                "light_user_min_daily": 0.5
-            }
-        })),
+        audience_config=audience_config,
         campaign_config=campaign_config
     )
 
