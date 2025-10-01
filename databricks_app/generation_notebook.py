@@ -201,7 +201,14 @@ def main() -> None:
         log_progress("START", "=" * 80)
         log_progress("CONFIG", f"Seed: {config.get('seed', 42)}")
         log_progress("CONFIG", f"Target: {config.get('catalog_name', 'bryan_li')}.{config.get('schema_name', 'synthetic_data')}")
-        log_progress("CONFIG", f"Households: {config.get('household_config', {}).get('num_households', 'N/A'):,}")
+
+        # Format household count with proper type checking
+        household_config = config.get('household_config', {})
+        num_households = household_config.get('num_households', 'N/A')
+        if isinstance(num_households, (int, float)):
+            log_progress("CONFIG", f"Households: {int(num_households):,}")
+        else:
+            log_progress("CONFIG", f"Households: {num_households}")
 
         # Initialize Spark
         spark = initialize_spark()
