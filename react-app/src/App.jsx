@@ -13,6 +13,7 @@ import { ReviewSubmit } from './components/wizard/ReviewSubmit';
 import { ProgressIndicator } from './components/common/ProgressIndicator';
 import { useConfigPersistence } from './hooks/useConfigPersistence';
 import { updateConfigSection } from './services/configService';
+import { AuthProvider } from './services/authService';
 import theme from './theme/theme';
 
 /**
@@ -160,13 +161,15 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter basename={basename}>
-        <Routes>
-          <Route path="/wizard/:step" element={<WizardRouter />} />
-          <Route path="/" element={<Navigate to="/wizard/0" replace />} />
-          <Route path="*" element={<Navigate to="/wizard/0" replace />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter basename={basename}>
+          <Routes>
+            <Route path="/wizard/:step" element={<WizardRouter />} />
+            <Route path="/" element={<Navigate to="/wizard/0" replace />} />
+            <Route path="*" element={<Navigate to="/wizard/0" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

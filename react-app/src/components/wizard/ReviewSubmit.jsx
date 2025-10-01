@@ -19,6 +19,8 @@ import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import { calculateMetrics, formatNumber } from '../../services/metricsCalculator';
+import { useAuth } from '../../services/authService';
+import { createDatabricksClient } from '../../services/databricksApi';
 
 /**
  * Review & Submit Component (Step 5 of wizard)
@@ -28,12 +30,15 @@ import { calculateMetrics, formatNumber } from '../../services/metricsCalculator
  * @param {Object} props.config - Complete configuration object
  * @param {function} props.onUpdate - Callback for output config updates
  * @param {function} props.onBack - Navigate to previous step
+ * @param {function} props.onJobSubmitted - Callback when job is submitted (receives runId)
  */
-export function ReviewSubmit({ config, onUpdate, onBack }) {
+export function ReviewSubmit({ config, onUpdate, onBack, onJobSubmitted }) {
+  const { getAccessToken } = useAuth();
   const [catalog, setCatalog] = useState(config?.output?.catalog || 'bryan_li');
   const [schema, setSchema] = useState(config?.output?.schema || 'synthetic_data');
   const [seed, setSeed] = useState(config?.output?.seed || Math.floor(Math.random() * 1000000));
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   // Calculate estimated metrics (FR-030)
   const metrics = useMemo(() => calculateMetrics(config), [config]);
@@ -50,23 +55,33 @@ export function ReviewSubmit({ config, onUpdate, onBack }) {
   // Handle job submission (FR-035)
   const handleSubmit = async () => {
     setSubmitting(true);
+    setError(null);
+
     try {
       // Update output configuration
       onUpdate({ catalog, schema, seed });
 
-      // TODO: Actual job submission when databricksApi (T014) is implemented
-      // const runId = await submitGenerationJob({ ...config, output: { catalog, schema, seed } });
+      // Create API client
+      const client = createDatabricksClient(getAccessToken);
 
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Mock delay
+      // Submit job with full configuration
+      const fullConfig = {
+        ...config,
+        output: { catalog, schema, seed },
+      };
 
-      alert('Job submission will be implemented when databricksApi (T014) is ready.\n\nConfiguration:\n' +
-        `- Catalog: ${catalog}\n` +
-        `- Schema: ${schema}\n` +
-        `- Seed: ${seed}\n` +
-        `- Households: ${formatNumber(config?.household?.numHouseholds || 10000)}`
-      );
+      console.log('Submitting job with config:', fullConfig);
+      const runId = await client.submitJob(fullConfig);
+
+      console.log('Job submitted successfully! Run ID:', runId);
+
+      // Notify parent component
+      if (onJobSubmitted) {
+        onJobSubmitted(runId);
+      }
     } catch (error) {
-      alert('Error: ' + error.message);
+      console.error('Job submission failed:', error);
+      setError(error.message);
     } finally {
       setSubmitting(false);
     }
@@ -292,6 +307,18 @@ export function ReviewSubmit({ config, onUpdate, onBack }) {
           Run: GRANT MODIFY ON CATALOG {catalog} TO `your_user`
         </Typography>
       </Alert>
+
+      {/* Error Display */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          <Typography variant="body2" fontWeight={600}>
+            Job Submission Failed
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            {error}
+          </Typography>
+        </Alert>
+      )}
 
       {/* Navigation Buttons */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
