@@ -1,6 +1,8 @@
 import React, { useCallback, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
-import { Container, Box, Typography, AppBar, Toolbar, Button, ThemeProvider } from '@mui/material';
+import { Container, Box, Typography, AppBar, Toolbar, Button } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { HouseholdConfig } from './components/wizard/HouseholdConfig';
@@ -11,7 +13,7 @@ import { ReviewSubmit } from './components/wizard/ReviewSubmit';
 import { ProgressIndicator } from './components/common/ProgressIndicator';
 import { useConfigPersistence } from './hooks/useConfigPersistence';
 import { updateConfigSection } from './services/configService';
-import { theme } from './theme/theme';
+import theme from './theme/theme';
 
 /**
  * Wizard Step Router Component
@@ -157,6 +159,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <BrowserRouter basename={basename}>
         <Routes>
           <Route path="/wizard/:step" element={<WizardRouter />} />
