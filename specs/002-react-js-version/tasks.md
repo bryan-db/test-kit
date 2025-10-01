@@ -375,7 +375,7 @@
   - Uses: useWizardState (T019), useConfigPersistence (T020)
   - **Success criteria**: Step 4 of wizard flow in T008 integration test
 
-- [ ] **T027** Implement ReviewSubmit component with configuration summary and job submission
+- [x] **T027** ✅ Implement ReviewSubmit component with configuration summary and job submission
   - Path: `react-app/src/components/wizard/ReviewSubmit.jsx`
   - Implement:
     - Comprehensive configuration summary (all steps organized by category) (FR-029)
@@ -483,7 +483,7 @@
 ## Phase 3.8: Root Application Components
 **Blocked by: T003, T019, T023-T027, T028 (theme, hooks, wizard components, progress indicator must exist)**
 
-- [ ] **T035** Implement App.jsx with routing and wizard layout
+- [x] **T035** ✅ Implement App.jsx with routing and wizard layout
   - Path: `react-app/src/App.jsx`
   - Implement:
     - React Router with routes for /wizard/:step (0-4)
