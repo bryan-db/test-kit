@@ -1,0 +1,37 @@
+{
+  "name": "Feature 001: Synthetic Identity Graph Data Generation",
+  "tasks": [
+    {
+      "task_key": "generate_synthetic_data",
+      "description": "Execute synthetic data generation pipeline with wizard configuration",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/bryan.li@databricks.com/test-kit/databricks_app/generation_notebook",
+        "base_parameters": {
+          "config_json": "{}"
+        }
+      },
+      "new_cluster": {
+        "spark_version": "14.3.x-scala2.12",
+        "node_type_id": "m5.4xlarge",
+        "num_workers": 8,
+        "spark_conf": {
+          "spark.databricks.delta.optimizeWrite.enabled": "true",
+          "spark.databricks.delta.autoCompact.enabled": "true",
+          "spark.sql.adaptive.enabled": "true",
+          "spark.databricks.photon.enabled": "true"
+        },
+        "spark_env_vars": {
+          "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
+        }
+      },
+      "timeout_seconds": 3600,
+      "max_retries": 1
+    }
+  ],
+  "email_notifications": {
+    "on_failure": ["bryan.li@databricks.com"]
+  },
+  "timeout_seconds": 7200,
+  "max_concurrent_runs": 1,
+  "format": "MULTI_TASK"
+}
