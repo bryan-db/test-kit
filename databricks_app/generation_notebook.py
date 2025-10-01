@@ -258,7 +258,9 @@ def write_result_to_volumes(result: Dict[str, Any], config: Dict[str, Any]) -> N
         config: Original configuration
     """
     try:
-        volume_path = "/Volumes/bryan_li/synthetic_data/generation_results"
+        catalog_name = config.get("catalog_name", "bryan_li")
+        schema_name = config.get("schema_name", "synthetic_data")
+        volume_path = f"/Volumes/{catalog_name}/{schema_name}/generation_results"
 
         # Create result file with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
