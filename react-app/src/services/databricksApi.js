@@ -121,7 +121,7 @@ export class DatabricksJobsClient {
     // Notebook expects: household_config, demographics_config, etc.
     const notebookConfig = {
       seed: config.output?.seed || 42,
-      catalog_name: config.output?.catalog || 'bryan_li',
+      catalog_name: config.output?.catalog || import.meta.env.VITE_DATABRICKS_CATALOG || 'bryan_li',
       schema_name: config.output?.schema || 'synthetic_data',
       household_config: config.household || {},
       demographics_config: config.demographics || {},
