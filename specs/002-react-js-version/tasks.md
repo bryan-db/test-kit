@@ -261,7 +261,7 @@
   - Reference: research.md §6 Proportional Redistribution Algorithm
   - **Success criteria**: Distribution sliders auto-adjust in T008 integration test (FR-010, FR-013, FR-015, FR-022)
 
-- [ ] **T018** Implement formatters and validators utility functions
+- [x] **T018** Implement formatters and validators utility functions
   - Path: `react-app/src/utils/formatters.js`, `react-app/src/utils/validators.js`
   - formatters.js:
     - formatNumber(num) - thousands separators
