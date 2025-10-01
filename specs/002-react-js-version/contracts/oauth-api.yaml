@@ -1,0 +1,112 @@
+openapi: 3.0.3
+info:
+  title: Databricks OAuth 2.0 API
+  description: OAuth 2.0 Authorization Code Flow with PKCE for Databricks workspace authentication
+  version: 2.0.0
+
+servers:
+  - url: https://e2-demo-field-eng.cloud.databricks.com
+    description: E2 Demo Field Engineering Workspace
+
+paths:
+  /oauth/authorize:
+    get:
+      operationId: authorize
+      summary: OAuth authorization endpoint
+      description: Redirects user to Databricks login page. Corresponds to FR-056 (OAuth 2.0 flow).
+      parameters:
+        - name: response_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [code]
+        - name: client_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: redirect_uri
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+            example: "jobs:read jobs:write catalogs:read"
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+            description: CSRF protection token
+        - name: code_challenge
+          in: query
+          required: true
+          schema:
+            type: string
+            description: Base64-URL-encoded SHA-256 hash of code_verifier (PKCE)
+        - name: code_challenge_method
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [S256]
+      responses:
+        '302':
+          description: Redirect to login page, then back to redirect_uri with authorization code
+
+  /oauth/token:
+    post:
+      operationId: token
+      summary: Exchange authorization code for access token
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [grant_type, code, redirect_uri, client_id, code_verifier]
+              properties:
+                grant_type:
+                  type: string
+                  enum: [authorization_code, refresh_token]
+                code:
+                  type: string
+                  description: Authorization code from callback
+                redirect_uri:
+                  type: string
+                client_id:
+                  type: string
+                code_verifier:
+                  type: string
+                  description: Original PKCE code verifier (43-128 characters)
+                refresh_token:
+                  type: string
+                  description: Refresh token (when grant_type=refresh_token)
+      responses:
+        '200':
+          description: Token issued successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [access_token, token_type, expires_in]
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: "Bearer"
+                  expires_in:
+                    type: integer
+                    description: Token lifetime in seconds
+                    example: 3600
+                  refresh_token:
+                    type: string
+                  scope:
+                    type: string

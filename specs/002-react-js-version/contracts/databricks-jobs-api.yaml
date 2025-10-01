@@ -1,0 +1,527 @@
+openapi: 3.0.3
+info:
+  title: Databricks Jobs API (Subset)
+  description: |
+    API contract for Databricks Jobs API endpoints used by the React application.
+    This is a subset of the full Jobs API v2.0, covering only endpoints required
+    for Feature 002 (React synthetic data generator).
+
+    Full API documentation: https://docs.databricks.com/api/workspace/jobs
+  version: 2.0.0
+  contact:
+    name: Databricks API Support
+    url: https://docs.databricks.com/
+
+servers:
+  - url: https://e2-demo-field-eng.cloud.databricks.com/api/2.0
+    description: E2 Demo Field Engineering Workspace
+
+security:
+  - BearerAuth: []
+
+paths:
+  /jobs/run-now:
+    post:
+      operationId: submitJob
+      summary: Submit a new job run
+      description: |
+        Submits a one-time job run with configuration parameters. Used to trigger
+        the Feature 001 data generation notebook with wizard configuration.
+
+        Corresponds to FR-035: Users MUST be able to submit the generation job.
+      tags:
+        - Job Execution
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunNowRequest'
+            examples:
+              syntheticDataGeneration:
+                summary: Synthetic data generation job
+                value:
+                  job_id: 123456789
+                  notebook_params:
+                    config: '{"household":{"numHouseholds":10000,"householdSizeMean":2.5}}'
+                    catalog: "bryan_li"
+                    schema: "synthetic_datasets"
+      responses:
+        '200':
+          description: Job successfully submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunNowResponse'
+              examples:
+                success:
+                  value:
+                    run_id: 987654321
+                    number_in_job: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                jobNotFound:
+                  value:
+                    error_code: "RESOURCE_DOES_NOT_EXIST"
+                    message: "Job 123456789 does not exist"
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /jobs/runs/get:
+    get:
+      operationId: getJobRun
+      summary: Get job run status
+      description: |
+        Retrieves the status and metadata of a specific job run. Used for polling
+        job progress every 5 seconds (FR-037).
+
+        Corresponds to FR-036: System MUST display real-time job status.
+      tags:
+        - Job Monitoring
+      parameters:
+        - name: run_id
+          in: query
+          required: true
+          description: The unique identifier of the job run
+          schema:
+            type: integer
+            format: int64
+            example: 987654321
+      responses:
+        '200':
+          description: Job run details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobRun'
+              examples:
+                running:
+                  summary: Job currently running
+                  value:
+                    run_id: 987654321
+                    job_id: 123456789
+                    state:
+                      life_cycle_state: "RUNNING"
+                      state_message: "In run"
+                    start_time: 1696118400000
+                    run_page_url: "https://e2-demo-field-eng.cloud.databricks.com/#job/123456789/run/987654321"
+                success:
+                  summary: Job completed successfully
+                  value:
+                    run_id: 987654321
+                    job_id: 123456789
+                    state:
+                      life_cycle_state: "TERMINATED"
+                      result_state: "SUCCESS"
+                      state_message: "Job completed successfully"
+                    start_time: 1696118400000
+                    end_time: 1696118700000
+                    execution_duration: 300000
+                    run_page_url: "https://e2-demo-field-eng.cloud.databricks.com/#job/123456789/run/987654321"
+                failed:
+                  summary: Job failed with error
+                  value:
+                    run_id: 987654321
+                    job_id: 123456789
+                    state:
+                      life_cycle_state: "TERMINATED"
+                      result_state: "FAILED"
+                      state_message: "Exception: Permission denied on catalog 'bryan_li'"
+                    start_time: 1696118400000
+                    end_time: 1696118500000
+                    run_page_url: "https://e2-demo-field-eng.cloud.databricks.com/#job/123456789/run/987654321"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Job run not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /jobs/runs/cancel:
+    post:
+      operationId: cancelJobRun
+      summary: Cancel a running job
+      description: |
+        Cancels a running or pending job run. Used when user wants to abort generation.
+      tags:
+        - Job Control
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - run_id
+              properties:
+                run_id:
+                  type: integer
+                  format: int64
+                  description: The run ID of the job to cancel
+                  example: 987654321
+      responses:
+        '200':
+          description: Job cancellation requested successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Job run not found or already terminated
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /jobs/runs/get-output:
+    get:
+      operationId: getJobOutput
+      summary: Get job run output and logs
+      description: |
+        Retrieves the output and error logs from a completed job run. Used to display
+        detailed error messages when job fails (FR-043).
+      tags:
+        - Job Monitoring
+      parameters:
+        - name: run_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 987654321
+      responses:
+        '200':
+          description: Job output retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobOutput'
+              examples:
+                success:
+                  value:
+                    metadata:
+                      run_id: 987654321
+                      state:
+                        life_cycle_state: "TERMINATED"
+                        result_state: "SUCCESS"
+                    notebook_output:
+                      result: '{"tables_created": 10, "rows_generated": 125000}'
+                error:
+                  value:
+                    metadata:
+                      run_id: 987654321
+                      state:
+                        life_cycle_state: "TERMINATED"
+                        result_state: "FAILED"
+                    error:
+                      "Traceback: PermissionError: User does not have MODIFY permission on schema bryan_li.synthetic_datasets"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Job run not found
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: OAuth 2.0 access token obtained from Databricks OAuth flow
+
+  schemas:
+    RunNowRequest:
+      type: object
+      required:
+        - job_id
+      properties:
+        job_id:
+          type: integer
+          format: int64
+          description: The ID of the job definition to run (Feature 001 job)
+          example: 123456789
+        notebook_params:
+          type: object
+          description: Key-value pairs passed to the notebook as parameters
+          additionalProperties:
+            type: string
+          example:
+            config: '{"household":{"numHouseholds":10000}}'
+            catalog: "bryan_li"
+            schema: "synthetic_datasets"
+        timeout_seconds:
+          type: integer
+          format: int32
+          description: Job timeout in seconds (optional)
+          default: 3600
+          example: 7200
+
+    RunNowResponse:
+      type: object
+      required:
+        - run_id
+      properties:
+        run_id:
+          type: integer
+          format: int64
+          description: The unique identifier for this job run
+          example: 987654321
+        number_in_job:
+          type: integer
+          format: int32
+          description: The sequence number of this run within the job
+          example: 42
+
+    JobRun:
+      type: object
+      required:
+        - run_id
+        - job_id
+        - state
+      properties:
+        run_id:
+          type: integer
+          format: int64
+          example: 987654321
+        job_id:
+          type: integer
+          format: int64
+          example: 123456789
+        state:
+          $ref: '#/components/schemas/JobState'
+        start_time:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) when job started
+          example: 1696118400000
+        setup_duration:
+          type: integer
+          format: int64
+          description: Time spent setting up cluster (milliseconds)
+          example: 60000
+        execution_duration:
+          type: integer
+          format: int64
+          description: Time spent executing notebook (milliseconds)
+          example: 240000
+        cleanup_duration:
+          type: integer
+          format: int64
+          description: Time spent cleaning up resources (milliseconds)
+          example: 10000
+        end_time:
+          type: integer
+          format: int64
+          description: Unix timestamp (milliseconds) when job completed
+          example: 1696118700000
+        run_page_url:
+          type: string
+          format: uri
+          description: Direct link to job run page in Databricks workspace (FR-041)
+          example: "https://e2-demo-field-eng.cloud.databricks.com/#job/123456789/run/987654321"
+        cluster_instance:
+          type: object
+          description: Details about the cluster used for execution
+          properties:
+            cluster_id:
+              type: string
+            spark_context_id:
+              type: string
+
+    JobState:
+      type: object
+      required:
+        - life_cycle_state
+      properties:
+        life_cycle_state:
+          type: string
+          enum:
+            - PENDING
+            - RUNNING
+            - TERMINATING
+            - TERMINATED
+            - SKIPPED
+            - INTERNAL_ERROR
+          description: Current lifecycle state of the job (FR-036)
+          example: "RUNNING"
+        result_state:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILED
+            - TIMEDOUT
+            - CANCELED
+          description: Final result state (only present when life_cycle_state is TERMINATED)
+          example: "SUCCESS"
+        state_message:
+          type: string
+          description: Human-readable message describing current state
+          example: "In run"
+        user_cancelled_or_timedout:
+          type: boolean
+          description: Whether the job was cancelled by user or timed out
+
+    JobOutput:
+      type: object
+      required:
+        - metadata
+      properties:
+        metadata:
+          type: object
+          properties:
+            run_id:
+              type: integer
+              format: int64
+            state:
+              $ref: '#/components/schemas/JobState'
+        notebook_output:
+          type: object
+          description: Output from notebook execution (when successful)
+          properties:
+            result:
+              type: string
+              description: Stringified JSON result from notebook
+            truncated:
+              type: boolean
+        error:
+          type: string
+          description: Error message and stack trace (when failed, FR-043)
+        error_trace:
+          type: string
+          description: Full stack trace for debugging
+
+    ErrorResponse:
+      type: object
+      required:
+        - error_code
+        - message
+      properties:
+        error_code:
+          type: string
+          description: Machine-readable error code
+          example: "INVALID_PARAMETER_VALUE"
+        message:
+          type: string
+          description: Human-readable error message (FR-048)
+          example: "Invalid value for parameter 'job_id': must be a positive integer"
+        details:
+          type: array
+          description: Additional error details
+          items:
+            type: object
+            properties:
+              "@type":
+                type: string
+              reason:
+                type: string
+              domain:
+                type: string
+              metadata:
+                type: object
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalidJobId:
+              value:
+                error_code: "INVALID_PARAMETER_VALUE"
+                message: "Invalid value for parameter 'job_id'"
+
+    Unauthorized:
+      description: Authentication token missing or invalid (triggers refresh flow, FR-058)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            tokenExpired:
+              value:
+                error_code: "UNAUTHENTICATED"
+                message: "Authentication token has expired"
+
+    Forbidden:
+      description: Insufficient permissions (FR-034 validation failure)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            noPermission:
+              value:
+                error_code: "PERMISSION_DENIED"
+                message: "User does not have permission to run jobs"
+
+    RateLimited:
+      description: Too many requests (NFR-006 retry with exponential backoff)
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying
+          schema:
+            type: integer
+            example: 60
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            rateLimited:
+              value:
+                error_code: "RESOURCE_EXHAUSTED"
+                message: "Rate limit exceeded. Please retry after 60 seconds"
+
+    ServerError:
+      description: Internal server error (NFR-006 retry up to 3 times)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            serverError:
+              value:
+                error_code: "INTERNAL_ERROR"
+                message: "An internal error occurred. Please try again later"
+
+tags:
+  - name: Job Execution
+    description: Submit and manage job runs
+  - name: Job Monitoring
+    description: Poll job status and retrieve outputs
+  - name: Job Control
+    description: Cancel or modify running jobs
