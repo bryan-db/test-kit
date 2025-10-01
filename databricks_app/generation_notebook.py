@@ -56,23 +56,15 @@ def parse_config() -> Dict[str, Any]:
 
 
 def initialize_spark() -> SparkSession:
-    """Initialize Spark session with optimized configurations.
+    """Get the active Spark session.
+
+    In Databricks notebooks, Spark is pre-initialized with optimal
+    configurations for the compute type (classic or serverless).
 
     Returns:
-        Configured SparkSession
+        Active SparkSession
     """
     spark = SparkSession.builder.getOrCreate()
-
-    # Enable Delta Lake optimizations
-    spark.conf.set("spark.databricks.delta.optimizeWrite.enabled", "true")
-    spark.conf.set("spark.databricks.delta.autoCompact.enabled", "true")
-
-    # Enable Adaptive Query Execution
-    spark.conf.set("spark.sql.adaptive.enabled", "true")
-
-    # Enable Photon if available
-    spark.conf.set("spark.databricks.photon.enabled", "true")
-
     return spark
 
 
