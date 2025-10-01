@@ -278,7 +278,7 @@
 ## Phase 3.4: Custom React Hooks
 **Blocked by: T011-T018 (services must exist first)**
 
-- [ ] **T019** [P] Implement useWizardState hook for navigation and validation
+- [x] **T019** [P] Implement useWizardState hook for navigation and validation
   - Path: `react-app/src/hooks/useWizardState.js`
   - Implement:
     - currentStep state (0-4)
