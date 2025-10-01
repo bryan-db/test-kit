@@ -151,9 +151,13 @@ function WizardRouter() {
  * Main App Component with Router
  */
 function App() {
+  const basename = process.env.NODE_ENV === 'production'
+    ? '/apps/synthetic-data-generator-react'
+    : '/';
+
   return (
     <ThemeProvider theme={theme}>
-      <BrowserRouter basename="/apps/synthetic-data-generator-react">
+      <BrowserRouter basename={basename}>
         <Routes>
           <Route path="/wizard/:step" element={<WizardRouter />} />
           <Route path="/" element={<Navigate to="/wizard/0" replace />} />

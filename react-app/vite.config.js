@@ -5,8 +5,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
 
-  // Base path for Databricks Apps deployment
-  base: '/apps/synthetic-data-generator-react/',
+  // Base path for Databricks Apps deployment (only in production)
+  base: process.env.NODE_ENV === 'production' ? '/apps/synthetic-data-generator-react/' : '/',
 
   // Build configuration
   build: {
