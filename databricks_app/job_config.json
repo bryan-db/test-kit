@@ -26,7 +26,12 @@
     {
       "environment_key": "serverless",
       "spec": {
-        "client": "1"
+        "client": "1",
+        "dependencies": [
+          "dbldatagen>=0.3.5",
+          "Faker>=20.0.0",
+          "databricks-sdk>=0.18.0"
+        ]
       }
     }
   ]
