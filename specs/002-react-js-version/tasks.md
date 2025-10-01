@@ -453,7 +453,7 @@
 ## Phase 3.7: Job Monitoring UI
 **Blocked by: T012, T014, T022 (job services and polling must exist)**
 
-- [ ] **T033** Implement JobStatusDisplay component with progress bar and lifecycle states
+- [x] **T033** ✅ Implement JobStatusDisplay component with progress bar and lifecycle states
   - Path: `react-app/src/components/job/JobStatusDisplay.jsx`
   - Implement:
     - Real-time job status display (FR-036): PENDING, RUNNING, TERMINATED
@@ -466,7 +466,7 @@
   - Blocked by: T012, T022
   - **Success criteria**: Job status updates in T009 integration test (job submission and polling)
 
-- [ ] **T034** Implement JobErrorDisplay component with troubleshooting guidance
+- [x] **T034** ✅ Implement JobErrorDisplay component with troubleshooting guidance
   - Path: `react-app/src/components/job/JobErrorDisplay.jsx`
   - Implement:
     - Error message display when job fails (FR-043)
