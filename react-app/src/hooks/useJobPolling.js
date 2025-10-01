@@ -31,16 +31,15 @@ export function useJobPolling(jobRunId, config, options = {}) {
   const timerRef = useRef(null);
   const clientRef = useRef(null);
 
-  // Initialize Databricks API client
-  if (!clientRef.current && getAccessToken) {
-    console.log('Initializing Databricks API client in useJobPolling');
-    clientRef.current = createDatabricksClient(getAccessToken);
-  }
-
-  // Debug: log when getAccessToken changes
+  // Initialize Databricks API client when getAccessToken becomes available
   useEffect(() => {
     console.log('useJobPolling: getAccessToken available:', !!getAccessToken);
-    console.log('useJobPolling: clientRef initialized:', !!clientRef.current);
+
+    if (getAccessToken && !clientRef.current) {
+      console.log('Initializing Databricks API client in useJobPolling');
+      clientRef.current = createDatabricksClient(getAccessToken);
+      console.log('useJobPolling: clientRef initialized:', !!clientRef.current);
+    }
   }, [getAccessToken]);
 
   /**

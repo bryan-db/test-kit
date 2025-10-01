@@ -250,17 +250,26 @@ def execute_generation_pipeline(
 
 # COMMAND ----------
 
-def write_result_to_volumes(result: Dict[str, Any], config: Dict[str, Any]) -> None:
+def write_result_to_volumes(result: Dict[str, Any], config: Dict[str, Any], spark: SparkSession) -> None:
     """Write generation result to Unity Catalog Volumes for wizard retrieval.
 
     Args:
         result: Generation result dictionary
         config: Original configuration
+        spark: Active SparkSession
     """
     try:
         catalog_name = config.get("catalog_name", "bryan_li")
         schema_name = config.get("schema_name", "synthetic_data")
-        volume_path = f"/Volumes/{catalog_name}/{schema_name}/generation_results"
+        volume_name = "generation_results"
+        volume_path = f"/Volumes/{catalog_name}/{schema_name}/{volume_name}"
+
+        # Create volume if it doesn't exist
+        try:
+            spark.sql(f"CREATE VOLUME IF NOT EXISTS {catalog_name}.{schema_name}.{volume_name}")
+            log_progress("SETUP", f"Volume {catalog_name}.{schema_name}.{volume_name} is ready")
+        except Exception as vol_err:
+            log_progress("WARNING", f"Could not create volume: {vol_err}")
 
         # Create result file with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -324,7 +333,7 @@ def main() -> None:
         log_progress("TIMING", f"Total execution time: {duration:.2f} seconds ({duration/60:.2f} minutes)")
 
         # Write result for wizard retrieval
-        write_result_to_volumes(result, config)
+        write_result_to_volumes(result, config, spark)
 
         log_progress("END", "=" * 80)
 
