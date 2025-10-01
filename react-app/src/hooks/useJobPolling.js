@@ -33,8 +33,15 @@ export function useJobPolling(jobRunId, config, options = {}) {
 
   // Initialize Databricks API client
   if (!clientRef.current && getAccessToken) {
+    console.log('Initializing Databricks API client in useJobPolling');
     clientRef.current = createDatabricksClient(getAccessToken);
   }
+
+  // Debug: log when getAccessToken changes
+  useEffect(() => {
+    console.log('useJobPolling: getAccessToken available:', !!getAccessToken);
+    console.log('useJobPolling: clientRef initialized:', !!clientRef.current);
+  }, [getAccessToken]);
 
   /**
    * Fetch job status from Databricks API
