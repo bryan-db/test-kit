@@ -194,35 +194,35 @@
   - ✅ Set duration_seconds for 'view' engagements only
   - ✅ Return PySpark DataFrame matching ContentEngagementSchema
 
-- [ ] **T024**: Implement audience attribute derivation in `databricks_app/src/generators/audience_generator.py`
-  - Aggregate content_engagements to compute viewership_patterns (total_engagements, frequency_daily_avg, recency, preferred_categories, preferred_device, peak_hour)
-  - Derive audience_attributes from viewership_patterns (segment_primary based on top category, affinity_scores, behavioral_classification thresholds, propensity_to_convert)
-  - Return two PySpark DataFrames: viewership_patterns and audience_attributes
+- [x] **T024**: Implement audience attribute derivation in `databricks_app/src/generators/audience_generator.py`
+  - ✅ Aggregate content_engagements to compute viewership_patterns (total_engagements, frequency_daily_avg, recency, preferred_categories, preferred_device, peak_hour)
+  - ✅ Derive audience_attributes from viewership_patterns (segment_primary based on top category, affinity_scores, behavioral_classification thresholds, propensity_to_convert)
+  - ✅ Return two PySpark DataFrames: viewership_patterns and audience_attributes
 
-- [ ] **T025**: Implement campaign generator in `databricks_app/src/generators/campaign_generator.py`
-  - Use dbldatagen to generate campaigns with configurable num_campaigns
-  - Set campaign_duration_days (random between min/max)
-  - Assign target_segment from available segments
-  - Assign channels from configured list
-  - Set realistic budget values
-  - Return PySpark DataFrame matching CampaignSchema
+- [x] **T025**: Implement campaign generator in `databricks_app/src/generators/campaign_generator.py`
+  - ✅ Use dbldatagen to generate campaigns with configurable num_campaigns
+  - ✅ Set campaign_duration_days (random between min/max)
+  - ✅ Assign target_segment from available segments
+  - ✅ Assign channels from configured list
+  - ✅ Set realistic budget values
+  - ✅ Return PySpark DataFrame matching CampaignSchema
 
-- [ ] **T026**: Implement campaign exposure generator in `databricks_app/src/generators/campaign_generator.py` (continues T025)
-  - Join individuals with campaigns to create exposures
-  - Implement reach_percentage (random sample of individuals per campaign)
-  - Set exposure_timestamp within campaign start_date/end_date
-  - Implement frequency distribution (1-10 exposures per individual-campaign pair)
-  - Calculate cost based on CPM model
-  - Return PySpark DataFrame matching CampaignExposureSchema
+- [x] **T026**: Implement campaign exposure generator in `databricks_app/src/generators/campaign_generator.py` (continues T025)
+  - ✅ Join individuals with campaigns to create exposures
+  - ✅ Implement reach_percentage (random sample of individuals per campaign)
+  - ✅ Set exposure_timestamp within campaign start_date/end_date
+  - ✅ Implement frequency distribution (1-10 exposures per individual-campaign pair)
+  - ✅ Calculate cost based on CPM model
+  - ✅ Return PySpark DataFrame matching CampaignExposureSchema
 
-- [ ] **T027**: Implement response generator in `databricks_app/src/generators/response_generator.py`
-  - Sample exposures to generate response_events based on response_rate_range
-  - Correlate response likelihood with propensity_to_convert from audience_attributes
-  - Set response_timestamp AFTER exposure_timestamp (temporal consistency)
-  - Calculate time_to_conversion_hours
-  - Assign value for 'conversion' response_type
-  - Derive outcome_metrics from response_events (conversion_status, revenue, engagement_score, attribution_weight)
-  - Return two PySpark DataFrames: response_events and outcome_metrics
+- [x] **T027**: Implement response generator in `databricks_app/src/generators/response_generator.py`
+  - ✅ Sample exposures to generate response_events based on response_rate_range
+  - ✅ Correlate response likelihood with propensity_to_convert from audience_attributes
+  - ✅ Set response_timestamp AFTER exposure_timestamp (temporal consistency)
+  - ✅ Calculate time_to_conversion_hours
+  - ✅ Assign value for 'conversion' response_type
+  - ✅ Derive outcome_metrics from response_events (conversion_status, revenue, engagement_score, attribution_weight)
+  - ✅ Return two PySpark DataFrames: response_events and outcome_metrics
 
 ## Phase 3.5: Unity Catalog Storage Layer ✅ COMPLETE
 

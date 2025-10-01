@@ -14,6 +14,16 @@ from databricks_app.src.generators.individual_generator import (
     generate_individuals_and_identities,
 )
 from databricks_app.src.generators.engagement_generator import generate_content_engagements
+from databricks_app.src.generators.audience_generator import (
+    derive_viewership_patterns_and_audience_attributes,
+)
+from databricks_app.src.generators.campaign_generator import (
+    generate_campaigns,
+    generate_campaign_exposures,
+)
+from databricks_app.src.generators.response_generator import (
+    generate_response_events_and_outcomes,
+)
 
 
 def execute_full_pipeline(
@@ -124,59 +134,46 @@ def execute_full_pipeline(
         result["row_counts"]["content_engagements"] = content_engagements_df.count()
         result["tables_created"].append("content_engagements")
 
-        # Phase 5-10: Placeholder for remaining generators
-        # These would be implemented in T024-T027
-        # For now, create empty DataFrames to satisfy tests
-
-        from databricks_app.src.models.schemas import (
-            get_viewership_pattern_schema,
-            get_audience_attribute_schema,
-            get_campaign_schema,
-            get_campaign_exposure_schema,
-            get_response_event_schema,
-            get_outcome_metric_schema,
+        # Phase 5: Derive viewership patterns and audience attributes
+        viewership_patterns_df, audience_attributes_df = (
+            derive_viewership_patterns_and_audience_attributes(
+                spark, individuals_df, content_engagements_df,
+                config.audience_config, seed=config.seed
+            )
         )
+        result["dataframes"]["viewership_patterns"] = viewership_patterns_df
+        result["dataframes"]["audience_attributes"] = audience_attributes_df
+        result["row_counts"]["viewership_patterns"] = viewership_patterns_df.count()
+        result["row_counts"]["audience_attributes"] = audience_attributes_df.count()
+        result["tables_created"].extend(["viewership_patterns", "audience_attributes"])
 
-        # Placeholder DataFrames (will be replaced with actual generators)
-        viewership_patterns_df = spark.createDataFrame([], get_viewership_pattern_schema())
-        audience_attributes_df = spark.createDataFrame([], get_audience_attribute_schema())
-        campaigns_df = spark.createDataFrame([], get_campaign_schema())
-        campaign_exposures_df = spark.createDataFrame([], get_campaign_exposure_schema())
-        response_events_df = spark.createDataFrame([], get_response_event_schema())
-        outcome_metrics_df = spark.createDataFrame([], get_outcome_metric_schema())
-
-        result["dataframes"].update(
-            {
-                "viewership_patterns": viewership_patterns_df,
-                "audience_attributes": audience_attributes_df,
-                "campaigns": campaigns_df,
-                "campaign_exposures": campaign_exposures_df,
-                "response_events": response_events_df,
-                "outcome_metrics": outcome_metrics_df,
-            }
+        # Phase 6: Generate campaigns
+        campaigns_df = generate_campaigns(
+            spark, config.campaign_config, seed=config.seed
         )
+        result["dataframes"]["campaigns"] = campaigns_df
+        result["row_counts"]["campaigns"] = campaigns_df.count()
+        result["tables_created"].append("campaigns")
 
-        result["row_counts"].update(
-            {
-                "viewership_patterns": 0,
-                "audience_attributes": 0,
-                "campaigns": config.campaign_config.num_campaigns if config.campaign_config else 0,
-                "campaign_exposures": 0,
-                "response_events": 0,
-                "outcome_metrics": 0,
-            }
+        # Phase 7: Generate campaign exposures
+        campaign_exposures_df = generate_campaign_exposures(
+            spark, individuals_df, campaigns_df, audience_attributes_df,
+            config.campaign_config, seed=config.seed
         )
+        result["dataframes"]["campaign_exposures"] = campaign_exposures_df
+        result["row_counts"]["campaign_exposures"] = campaign_exposures_df.count()
+        result["tables_created"].append("campaign_exposures")
 
-        result["tables_created"].extend(
-            [
-                "viewership_patterns",
-                "audience_attributes",
-                "campaigns",
-                "campaign_exposures",
-                "response_events",
-                "outcome_metrics",
-            ]
+        # Phase 8: Generate response events and outcome metrics
+        response_events_df, outcome_metrics_df = generate_response_events_and_outcomes(
+            spark, campaign_exposures_df, audience_attributes_df,
+            config.campaign_config, seed=config.seed
         )
+        result["dataframes"]["response_events"] = response_events_df
+        result["dataframes"]["outcome_metrics"] = outcome_metrics_df
+        result["row_counts"]["response_events"] = response_events_df.count()
+        result["row_counts"]["outcome_metrics"] = outcome_metrics_df.count()
+        result["tables_created"].extend(["response_events", "outcome_metrics"])
 
         # Write to Unity Catalog if requested
         if write_to_catalog:
