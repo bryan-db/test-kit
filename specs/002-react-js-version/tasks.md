@@ -336,7 +336,7 @@
   - Uses: useWizardState (T019), useConfigPersistence (T020), useDistributionSlider (T021), metricsCalculator (T016)
   - **Success criteria**: Step 1 of wizard flow in T008 integration test
 
-- [ ] **T024** [P] Implement DemographicsConfig component with age range and distribution sliders
+- [x] **T024** ✅ [P] Implement DemographicsConfig component with age range and distribution sliders
   - Path: `react-app/src/components/wizard/DemographicsConfig.jsx`
   - Implement:
     - Age range sliders (min, max) with validation min < max (FR-011, FR-045)
@@ -349,7 +349,7 @@
   - Uses: useWizardState (T019), useConfigPersistence (T020), useDistributionSlider (T021)
   - **Success criteria**: Step 2 of wizard flow in T008 integration test
 
-- [ ] **T025** [P] Implement EngagementConfig component with temporal patterns and content categories
+- [x] **T025** ✅ [P] Implement EngagementConfig component with temporal patterns and content categories
   - Path: `react-app/src/components/wizard/EngagementConfig.jsx`
   - Implement:
     - Time period slider (7-730 days) (FR-017)
@@ -363,7 +363,7 @@
   - Uses: useWizardState (T019), useConfigPersistence (T020), useDistributionSlider (T021), metricsCalculator (T016)
   - **Success criteria**: Step 3 of wizard flow in T008 integration test
 
-- [ ] **T026** [P] Implement CampaignConfig component with channels and response rates
+- [x] **T026** ✅ [P] Implement CampaignConfig component with channels and response rates
   - Path: `react-app/src/components/wizard/CampaignConfig.jsx`
   - Implement:
     - Number of campaigns slider (1-100) (FR-024)
