@@ -49,7 +49,7 @@ export class DatabricksJobsClient {
           'Content-Type': 'application/json',
           ...options.headers,
         },
-        signal: controller.abort,
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
