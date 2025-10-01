@@ -7,11 +7,13 @@ import {
   Slider,
   Grid,
   Alert,
+  Button,
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import PeopleIcon from '@mui/icons-material/People';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useDistributionSlider } from '../../hooks/useDistributionSlider';
 import { calculateMetrics, formatNumber } from '../../services/metricsCalculator';
 import { validateDistributionSum } from '../../utils/proportionalRedistribute';
@@ -202,6 +204,20 @@ export function HouseholdConfig({ config, onUpdate }) {
           )}
         </CardContent>
       </Card>
+
+      {/* Navigation Buttons */}
+      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          variant="contained"
+          size="large"
+          endIcon={<ArrowForwardIcon />}
+          disabled={!incomeBracketsValid}
+          onClick={() => alert('Navigation will be implemented once we add wizard routing')}
+          sx={{ minWidth: 150 }}
+        >
+          Next Step
+        </Button>
+      </Box>
     </Box>
   );
 }

@@ -97,14 +97,16 @@ function App() {
         {/* Household Configuration Component */}
         <HouseholdConfig config={config?.config} onUpdate={handleHouseholdUpdate} />
 
-        {/* Debug Info */}
-        <Box sx={{ mt: 4, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
-          <Typography variant="caption" component="pre" sx={{ fontSize: '0.75rem' }}>
-            Last Modified: {config?.lastModified}
-            <br />
-            Config saved to localStorage automatically
-          </Typography>
-        </Box>
+        {/* Debug Info - Hidden by default, styled for dark theme */}
+        {process.env.NODE_ENV === 'development' && (
+          <Box sx={{ mt: 4, p: 2, bgcolor: 'rgba(30, 41, 59, 0.5)', borderRadius: 2, border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+            <Typography variant="caption" component="div" sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+              Last Modified: {config?.lastModified}
+              <br />
+              Config saved to localStorage automatically
+            </Typography>
+          </Box>
+        )}
       </Container>
     </>
   );
