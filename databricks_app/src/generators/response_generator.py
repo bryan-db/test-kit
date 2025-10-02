@@ -163,12 +163,13 @@ def generate_response_events_and_outcomes(
     @pandas_udf("string")
     def assign_attribution_model(response_ids: pd.Series) -> pd.Series:
         from faker import Faker
+        from collections import OrderedDict
         fake = Faker()
         Faker.seed(seed + 31)
         models = ["first_touch", "last_touch", "linear", "time_decay"]
         weights = [0.3, 0.4, 0.2, 0.1]
         return pd.Series([
-            fake.random_element(elements=dict(zip(models, weights)))
+            fake.random_element(elements=OrderedDict(zip(models, weights)))
             for _ in range(len(response_ids))
         ])
 
