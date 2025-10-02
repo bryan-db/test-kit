@@ -73,7 +73,8 @@ def generate_content_engagements(
         "comment": 0.01,
     }
 
-    content_categories = config.content_categories or {
+    # Handle content_categories as either dict or list
+    content_categories_config = config.content_categories or {
         "Technology": 0.25,
         "Sports": 0.20,
         "Entertainment": 0.20,
@@ -81,6 +82,13 @@ def generate_content_engagements(
         "Lifestyle": 0.10,
         "Finance": 0.10,
     }
+
+    if isinstance(content_categories_config, list):
+        # Convert list to dict with equal weights
+        equal_weight = 1.0 / len(content_categories_config)
+        content_categories = {cat: equal_weight for cat in content_categories_config}
+    else:
+        content_categories = content_categories_config
 
     duration_min = config.duration_range.get("min", 10)
     duration_max = config.duration_range.get("max", 3600)
