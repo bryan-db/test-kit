@@ -281,10 +281,14 @@ def generate_campaign_exposures(
 
     # Calculate cost based on CPM model
     # CPM varies by channel: email=$5, social=$10, display=$15, video=$20, ctv=$25
-    cpm_map = {"email": 5.0, "social media": 10.0, "display ads": 15.0, "video": 20.0, "ctv": 25.0}
-    cost_expr = lit(10.0 / 1000.0)  # default CPM $10
-    for channel, cpm in cpm_map.items():
-        cost_expr = when(col("channel").lower() == channel.lower(), lit(cpm / 1000.0)).otherwise(cost_expr)
+    cost_expr = (
+        when(col("channel") == "Email", lit(5.0 / 1000.0))
+        .when(col("channel") == "Social Media", lit(10.0 / 1000.0))
+        .when(col("channel") == "Display Ads", lit(15.0 / 1000.0))
+        .when(col("channel") == "video", lit(20.0 / 1000.0))
+        .when(col("channel") == "ctv", lit(25.0 / 1000.0))
+        .otherwise(lit(10.0 / 1000.0))  # default CPM $10
+    )
 
     exposures_sampled = exposures_sampled.withColumn(
         "cost",
