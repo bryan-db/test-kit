@@ -146,7 +146,11 @@ def derive_viewership_patterns_and_audience_attributes(
     # Phase 7: Derive audience attributes from viewership patterns
 
     # Behavioral classification based on frequency thresholds
-    behavioral_thresholds = config.behavioral_thresholds
+    behavioral_thresholds = getattr(config, 'behavioral_thresholds', {
+        "heavy_user_min_daily": 10.0,
+        "moderate_user_min_daily": 2.0,
+        "light_user_min_daily": 0.5
+    })
     audience_attributes = viewership_patterns.withColumn(
         "behavioral_classification",
         when(col("frequency_daily_avg") >= behavioral_thresholds["heavy_user_min_daily"], lit("Heavy User"))
@@ -156,7 +160,10 @@ def derive_viewership_patterns_and_audience_attributes(
     )
 
     # Primary segment based on top category
-    segments = config.segments
+    segments = getattr(config, 'segments', [
+        "Tech Enthusiast", "Sports Fan", "News Junkie",
+        "Entertainment Seeker", "Casual User"
+    ])
     audience_attributes = audience_attributes.withColumn(
         "segment_primary",
         when(size(col("preferred_categories")) > 0, element_at(col("preferred_categories"), 1))
