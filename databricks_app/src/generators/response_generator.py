@@ -36,8 +36,9 @@ def generate_response_events_and_outcomes(
     Returns:
         Tuple of (response_events_df, outcome_metrics_df)
     """
-    response_rate_min = config.response_rate_range["min"]
-    response_rate_max = config.response_rate_range["max"]
+    response_rate_range = getattr(config, 'response_rate_range', {"min": 0.01, "max": 0.05})
+    response_rate_min = response_rate_range["min"]
+    response_rate_max = response_rate_range["max"]
 
     # Join exposures with audience attributes to get propensity_to_convert
     exposures_with_propensity = campaign_exposures_df.join(
