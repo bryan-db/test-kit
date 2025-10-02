@@ -70,8 +70,7 @@ def generate_campaigns(
         .withColumn(
             "goal_index",
             "integer",
-            minValue=0,
-            maxValue=2,
+            values=[0, 1, 2],
             weights=[0.3, 0.4, 0.3],  # awareness, consideration, conversion
             random=True
         )
