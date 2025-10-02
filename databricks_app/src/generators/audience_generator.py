@@ -216,7 +216,7 @@ def derive_viewership_patterns_and_audience_attributes(
     # Create map and normalize
     category_affinities = category_affinities.withColumn(
         "total_count",
-        expr("aggregate(affinity_counts, 0, (acc, x) -> acc + x)")
+        expr("aggregate(affinity_counts, CAST(0 AS BIGINT), (acc, x) -> acc + x)")
     ).withColumn(
         "affinity_scores_normalized",
         expr("transform(affinity_counts, x -> CAST(x AS DOUBLE) / total_count)")
