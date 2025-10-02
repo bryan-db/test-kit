@@ -27,11 +27,15 @@ class CatalogWriter:
         """
         self.spark = spark
 
-        # Enable Delta Lake optimizations
-        self.spark.conf.set("spark.databricks.delta.optimizeWrite.enabled", "true")
-        self.spark.conf.set("spark.databricks.delta.autoCompact.enabled", "true")
-        self.spark.conf.set("spark.databricks.delta.properties.defaults.autoOptimize.optimizeWrite", "true")
-        self.spark.conf.set("spark.databricks.delta.properties.defaults.autoOptimize.autoCompact", "true")
+        # Enable Delta Lake optimizations (skip if not available in serverless)
+        try:
+            self.spark.conf.set("spark.databricks.delta.optimizeWrite.enabled", "true")
+            self.spark.conf.set("spark.databricks.delta.autoCompact.enabled", "true")
+            self.spark.conf.set("spark.databricks.delta.properties.defaults.autoOptimize.optimizeWrite", "true")
+            self.spark.conf.set("spark.databricks.delta.properties.defaults.autoOptimize.autoCompact", "true")
+        except Exception:
+            # These configs may not be available in serverless/connect environments
+            pass
 
     def write_table(
         self,
