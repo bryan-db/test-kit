@@ -45,6 +45,24 @@ def camel_to_snake(name: str) -> str:
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
+def normalize_value(value: str) -> str:
+    """Normalize string values by converting to lowercase snake_case.
+
+    Args:
+        value: String value to normalize
+
+    Returns:
+        Normalized value in lowercase snake_case
+    """
+    # Replace spaces with underscores and convert to lowercase
+    normalized = value.replace(" ", "_").replace("'", "").lower()
+    # Remove any consecutive underscores
+    normalized = re.sub(r'_+', '_', normalized)
+    # Remove leading/trailing underscores
+    normalized = normalized.strip('_')
+    return normalized
+
+
 def convert_dict_keys_to_snake_case(data: Any) -> Any:
     """Recursively convert all dictionary keys from camelCase to snake_case.
 
@@ -60,6 +78,42 @@ def convert_dict_keys_to_snake_case(data: Any) -> Any:
         return [convert_dict_keys_to_snake_case(item) for item in data]
     else:
         return data
+
+
+def normalize_distribution_values(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Normalize distribution dictionary values to snake_case.
+
+    This fixes issues with dbldatagen SQL generation when values contain spaces.
+
+    Args:
+        config: Configuration dictionary
+
+    Returns:
+        Config with normalized distribution values
+    """
+    # Normalize demographics_config distributions
+    if "demographics_config" in config:
+        demo = config["demographics_config"]
+
+        # Normalize gender_distribution values
+        if "gender_distribution" in demo and isinstance(demo["gender_distribution"], dict):
+            demo["gender_distribution"] = {
+                normalize_value(k): v for k, v in demo["gender_distribution"].items()
+            }
+
+        # Normalize education_distribution values
+        if "education_distribution" in demo and isinstance(demo["education_distribution"], dict):
+            demo["education_distribution"] = {
+                normalize_value(k): v for k, v in demo["education_distribution"].items()
+            }
+
+        # Normalize employment_distribution values
+        if "employment_distribution" in demo and isinstance(demo["employment_distribution"], dict):
+            demo["employment_distribution"] = {
+                normalize_value(k): v for k, v in demo["employment_distribution"].items()
+            }
+
+    return config
 
 
 def parse_config() -> Dict[str, Any]:
@@ -87,6 +141,8 @@ def parse_config() -> Dict[str, Any]:
         config = json.loads(config_json)
         # Convert all camelCase keys to snake_case to match Python dataclass expectations
         config = convert_dict_keys_to_snake_case(config)
+        # Normalize distribution values to snake_case (fixes dbldatagen SQL generation)
+        config = normalize_distribution_values(config)
         return config
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON in config parameter: {e}")
