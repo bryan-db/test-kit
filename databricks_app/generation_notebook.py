@@ -116,6 +116,69 @@ def normalize_distribution_values(config: Dict[str, Any]) -> Dict[str, Any]:
     return config
 
 
+def restructure_react_config(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Restructure React app config to match Python dataclass structure.
+
+    The React app sends a flat structure with camelCase, but Python expects
+    nested structure. This function handles the conversion.
+
+    Args:
+        config: Configuration from React app
+
+    Returns:
+        Restructured config matching Python dataclass expectations
+    """
+    # Handle household_config restructuring
+    if "household_config" in config:
+        hh = config["household_config"]
+
+        # Restructure householdSizeMean/StdDev into size_distribution
+        if "household_size_mean" in hh and "household_size_std_dev" in hh:
+            hh["size_distribution"] = {
+                "mean": hh.pop("household_size_mean"),
+                "std_dev": hh.pop("household_size_std_dev")
+            }
+
+    # Handle demographics_config restructuring
+    if "demographics_config" in config:
+        demo = config["demographics_config"]
+
+        # Restructure ageRange into age_range if it's not already structured correctly
+        if "age_range" in demo and isinstance(demo["age_range"], dict):
+            # Already in correct format
+            pass
+
+    # Handle engagement_config restructuring
+    if "engagement_config" in config:
+        eng = config["engagement_config"]
+
+        # Rename time_period_days if needed
+        if "time_period_days" in eng:
+            # Already in correct format
+            pass
+
+        # Rename events_per_person if needed
+        if "events_per_person" in eng:
+            # Already in correct format
+            pass
+
+    # Handle campaign_config restructuring
+    if "campaign_config" in config:
+        camp = config["campaign_config"]
+
+        # Restructure durationRange into duration_range if needed
+        if "duration_range" in camp and isinstance(camp["duration_range"], dict):
+            # Already in correct format
+            pass
+
+        # Restructure responseRateRange into response_rate_range if needed
+        if "response_rate_range" in camp and isinstance(camp["response_rate_range"], dict):
+            # Already in correct format
+            pass
+
+    return config
+
+
 def parse_config() -> Dict[str, Any]:
     """Parse configuration from job parameters.
 
@@ -141,6 +204,8 @@ def parse_config() -> Dict[str, Any]:
         config = json.loads(config_json)
         # Convert all camelCase keys to snake_case to match Python dataclass expectations
         config = convert_dict_keys_to_snake_case(config)
+        # Restructure React app config to match Python dataclass structure
+        config = restructure_react_config(config)
         # Normalize distribution values to snake_case (fixes dbldatagen SQL generation)
         config = normalize_distribution_values(config)
         return config
