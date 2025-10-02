@@ -46,7 +46,6 @@ def derive_viewership_patterns_and_audience_attributes(
             spark_max("timestamp").alias("recency_last_engagement"),
             spark_min("timestamp").alias("first_engagement"),
             collect_list("content_category").alias("all_categories"),
-            collect_list("device_type").alias("all_devices"),
             collect_list("timestamp").alias("all_timestamps")
         )
     )
@@ -82,22 +81,7 @@ def derive_viewership_patterns_and_audience_attributes(
         .agg(collect_list("content_category").alias("preferred_categories"))
     )
 
-    # Phase 4: Extract preferred device (mode)
-    device_counts = (
-        content_engagements_df
-        .groupBy("individual_id", "device_type")
-        .agg(count("*").alias("device_count"))
-    )
-
-    window_device = Window.partitionBy("individual_id").orderBy(col("device_count").desc())
-    preferred_devices = (
-        device_counts
-        .withColumn("rank", row_number().over(window_device))
-        .filter(col("rank") == 1)
-        .select("individual_id", col("device_type").alias("preferred_device"))
-    )
-
-    # Phase 5: Compute peak hour (hour of day with most activity)
+    # Phase 4: Compute peak hour (hour of day with most activity)
     hour_counts = (
         content_engagements_df
         .withColumn("hour_of_day", hour("timestamp"))
@@ -113,13 +97,12 @@ def derive_viewership_patterns_and_audience_attributes(
         .select("individual_id", col("hour_of_day").alias("peak_hour"))
     )
 
-    # Phase 6: Join all viewership pattern components
+    # Phase 5: Join all viewership pattern components
     viewership_patterns = (
         individuals_df
         .select("individual_id")
         .join(engagement_agg, "individual_id", "left")
         .join(top_categories, "individual_id", "left")
-        .join(preferred_devices, "individual_id", "left")
         .join(peak_hours, "individual_id", "left")
     )
 
@@ -127,7 +110,6 @@ def derive_viewership_patterns_and_audience_attributes(
     viewership_patterns = viewership_patterns.fillna({
         "total_engagements": 0,
         "frequency_daily_avg": 0.0,
-        "preferred_device": "mobile",  # default
         "peak_hour": 20  # default to 8pm
     })
 
@@ -157,7 +139,6 @@ def derive_viewership_patterns_and_audience_attributes(
         "frequency_daily_avg",
         "recency_last_engagement",
         "preferred_categories",
-        "preferred_device",
         "peak_hour",
         "computed_at"
     )
