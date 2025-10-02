@@ -270,7 +270,7 @@ def generate_campaign_exposures(
         fake = Faker()
         Faker.seed(seed + 17)
         return pd.Series([
-            fake.random_element(ch) if ch else "email"
+            fake.random_element(ch) if ch is not None and len(ch) > 0 else "email"
             for ch in channels_col
         ])
 
