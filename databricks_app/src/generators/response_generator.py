@@ -87,7 +87,7 @@ def generate_response_events_and_outcomes(
         .otherwise(rand(seed + 29) * 120 + 168)  # 168-288 hours (10%)
     ).withColumn(
         "response_timestamp",
-        expr("exposure_timestamp + interval time_to_conversion_hours hours")
+        expr("timestamp(exposure_timestamp + make_interval(0, 0, 0, 0, cast(time_to_conversion_hours as int), 0, 0))")
     )
 
     # Generate monetary value for conversion responses
