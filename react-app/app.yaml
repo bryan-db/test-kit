@@ -1,0 +1,11 @@
+# Databricks App configuration for React.js Synthetic Data Generator
+
+# Command to run the app
+command: ["sh", "-c", "python3 -m http.server 8080 --directory dist"]
+
+resources:
+  - name: feature-001-job
+    description: Databricks job that generates synthetic identity graph data
+    job:
+      id: "907056460690317"
+      permission: "CAN_MANAGE_RUN"
