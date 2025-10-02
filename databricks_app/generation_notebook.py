@@ -458,19 +458,18 @@ def main() -> None:
 
         log_progress("END", "=" * 80)
 
-        # Exit with appropriate code
+        # Log completion status (don't call sys.exit - let notebook complete naturally)
         if result["status"] == "completed":
             log_progress("END", "✅ SUCCESS")
-            sys.exit(0)
         else:
             log_progress("END", f"❌ FAILED: {result.get('error', 'Unknown error')}")
-            sys.exit(1)
+            raise RuntimeError(f"Pipeline failed: {result.get('error', 'Unknown error')}")
 
     except Exception as e:
         log_progress("ERROR", f"Unexpected error: {str(e)}")
         import traceback
         traceback.print_exc()
-        sys.exit(1)
+        raise
 
 
 # Databricks notebook execution
