@@ -198,7 +198,7 @@ def generate_campaign_exposures(
     Returns:
         DataFrame matching CampaignExposureSchema
     """
-    reach_percentage = config.reach_percentage
+    reach_percentage = getattr(config, 'reach_percentage', 0.3)  # default 30% reach
 
     # Join individuals with their primary segment
     individuals_with_segment = individuals_df.join(
