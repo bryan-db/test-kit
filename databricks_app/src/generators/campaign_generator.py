@@ -260,7 +260,7 @@ def generate_campaign_exposures(
 
     exposures_sampled = exposures_sampled.withColumn(
         "exposure_timestamp",
-        expr("timestamp(date_add(start_date, exposure_offset_days) + make_interval(0, 0, 0, 0, exposure_offset_hours, 0, 0))")
+        expr("cast(date_add(start_date, exposure_offset_days) as timestamp) + make_interval(0, 0, 0, 0, exposure_offset_hours, 0, 0)")
     )
 
     # Select one channel from campaign channels for this exposure
