@@ -68,29 +68,29 @@ def generate_individuals(
     age_std = (age_max - age_min) / 6  # ~99% within range
 
     gender_dist = config.gender_distribution or {
-        "Male": 0.48,
-        "Female": 0.48,
-        "Non-Binary": 0.03,
-        "Prefer not to say": 0.01,
+        "male": 0.48,
+        "female": 0.48,
+        "non_binary": 0.03,
+        "prefer_not_to_say": 0.01,
     }
 
     education_dist = config.education_distribution or {
-        "Less than High School": 0.12,
-        "High School": 0.28,
-        "Some College": 0.21,
-        "Associate": 0.06,
-        "Bachelor": 0.20,
-        "Master": 0.10,
-        "Doctorate": 0.03,
+        "less_than_high_school": 0.12,
+        "high_school": 0.28,
+        "some_college": 0.21,
+        "associate": 0.06,
+        "bachelor": 0.20,
+        "master": 0.10,
+        "doctorate": 0.03,
     }
 
     employment_dist = config.employment_distribution or {
-        "Employed Full-Time": 0.55,
-        "Employed Part-Time": 0.12,
-        "Self-Employed": 0.08,
-        "Unemployed": 0.05,
-        "Retired": 0.15,
-        "Student": 0.05,
+        "employed_full_time": 0.55,
+        "employed_part_time": 0.12,
+        "self_employed": 0.08,
+        "unemployed": 0.05,
+        "retired": 0.15,
+        "student": 0.05,
     }
 
     # Explode households by household_size to create individual records
