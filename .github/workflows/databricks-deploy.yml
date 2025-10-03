@@ -1,0 +1,90 @@
+# GitHub Actions Workflow: Deploy Databricks Asset Bundle
+# Feature: 003-databricks-asset-bundles
+# Purpose: Automate bundle deployment to dev and prod environments
+
+name: Deploy Databricks Asset Bundle
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  # Job 1: Validate bundle configuration on all events
+  validate:
+    name: Validate Bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Validate bundle configuration
+        run: databricks bundle validate --target dev
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+  # Job 2: Deploy to dev environment on push to main
+  deploy_dev:
+    name: Deploy to Dev
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Deploy to dev environment
+        run: databricks bundle deploy --target dev
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+      - name: Report deployment
+        run: |
+          echo "✅ Dev deployment complete!"
+          echo "Workspace: $DATABRICKS_HOST"
+          echo "Target: dev"
+
+  # Job 3: Deploy to prod environment with manual approval
+  deploy_prod:
+    name: Deploy to Production
+    needs: validate
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    # CRITICAL: Requires manual approval via GitHub environment protection
+    environment:
+      name: production
+      url: https://e2-demo-field-eng.cloud.databricks.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Deploy to production environment
+        run: databricks bundle deploy --target prod
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+          DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+
+      - name: Report deployment
+        run: |
+          echo "✅ Production deployment complete!"
+          echo "Workspace: $DATABRICKS_HOST"
+          echo "Target: prod"
+          echo "Git Tag: ${{ github.ref_name }}"

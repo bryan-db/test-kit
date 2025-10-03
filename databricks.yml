@@ -1,0 +1,103 @@
+# Databricks Asset Bundle Configuration
+# Feature: 003-databricks-asset-bundles
+# Purpose: Package test-kit for deployment across dev and prod environments
+
+bundle:
+  name: test-kit
+
+# Variables: Environment-agnostic configuration with target-specific overrides
+variables:
+  catalog_name:
+    description: "Unity Catalog name for all data assets"
+    default: bryan_li
+
+  schema_name:
+    description: "Schema name (environment-specific: synthetic_datasets_dev or synthetic_datasets_prod)"
+    # No default - must be provided by target
+
+  cluster_node_type:
+    description: "EC2 instance type for cluster nodes"
+    # No default - must be provided by target
+
+  cluster_num_workers:
+    description: "Number of worker nodes in the cluster"
+    # No default - must be provided by target
+
+# Resources: Job and App definitions
+resources:
+  jobs:
+    synthetic_data_generation:
+      name: "Synthetic Data Generation (${bundle.target})"
+
+      tasks:
+        - task_key: generate_data
+          notebook_task:
+            notebook_path: databricks_app/generation_notebook.py
+            base_parameters:
+              catalog: "${var.catalog_name}"
+              schema: "${var.schema_name}"
+
+          new_cluster:
+            spark_version: "14.3.x-scala2.12"
+            node_type_id: "${var.cluster_node_type}"
+            num_workers: "${var.cluster_num_workers}"
+            spark_conf:
+              "spark.databricks.delta.optimizeWrite.enabled": "true"
+              "spark.databricks.delta.autoCompact.enabled": "true"
+            data_security_mode: USER_ISOLATION
+
+          libraries:
+            - pypi:
+                package: "dbldatagen>=0.3.0"
+            - pypi:
+                package: "faker>=18.0.0"
+
+      # Job-level configuration
+      max_concurrent_runs: 1
+      timeout_seconds: 3600
+
+      email_notifications:
+        on_failure:
+          - bryan.li@databricks.com
+
+  apps:
+    synthetic_data_generator:
+      name: "Synthetic Data Generator (${bundle.target})"
+      description: "React application for configuring and triggering synthetic identity graph data generation"
+
+      # Path to React app source code
+      source_code_path: react-app/
+
+      # Grant app permission to manage the data generation job
+      resources:
+        - name: data_generation_job
+          description: "Job that generates synthetic identity graph data"
+          job:
+            id: "${resources.jobs.synthetic_data_generation.id}"
+            permission: CAN_MANAGE_RUN
+
+# Targets: Environment-specific configurations
+targets:
+  # Development Environment
+  dev:
+    mode: development
+    workspace:
+      host: https://e2-demo-field-eng.cloud.databricks.com
+      root_path: /Users/${workspace.current_user.userName}/.bundle/${bundle.target}/${bundle.name}
+
+    variables:
+      schema_name: synthetic_datasets_dev
+      cluster_node_type: i3.xlarge
+      cluster_num_workers: 2
+
+  # Production Environment (with stricter safeguards)
+  prod:
+    mode: production  # Enforces confirmation prompts for destructive changes
+    workspace:
+      host: https://e2-demo-field-eng.cloud.databricks.com
+      root_path: /Users/${workspace.current_user.userName}/.bundle/${bundle.target}/${bundle.name}
+
+    variables:
+      schema_name: synthetic_datasets_prod
+      cluster_node_type: i3.2xlarge
+      cluster_num_workers: 8

@@ -1,0 +1,19 @@
+# App Resource: Synthetic Data Generator (React Application)
+# Deploys the React frontend for configuring and triggering data generation
+
+resources:
+  apps:
+    synthetic_data_generator:
+      name: "Synthetic Data Generator (${bundle.target})"
+      description: "React application for configuring and triggering synthetic identity graph data generation"
+
+      # Path to React app source code
+      source_code_path: react-app/
+
+      # Grant app permission to manage the data generation job
+      resources:
+        - name: data_generation_job
+          description: "Job that generates synthetic identity graph data"
+          job:
+            id: "${resources.jobs.synthetic_data_generation.id}"
+            permission: CAN_MANAGE_RUN

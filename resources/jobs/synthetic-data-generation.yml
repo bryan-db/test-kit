@@ -1,0 +1,38 @@
+# Job Resource: Synthetic Data Generation
+# Executes the generation_notebook.py to create synthetic identity graph data
+
+resources:
+  jobs:
+    synthetic_data_generation:
+      name: "Synthetic Data Generation (${bundle.target})"
+
+      tasks:
+        - task_key: generate_data
+          notebook_task:
+            notebook_path: databricks_app/generation_notebook.py
+            base_parameters:
+              catalog: "${var.catalog_name}"
+              schema: "${var.schema_name}"
+
+          new_cluster:
+            spark_version: "14.3.x-scala2.12"
+            node_type_id: "${var.cluster_node_type}"
+            num_workers: "${var.cluster_num_workers}"
+            spark_conf:
+              "spark.databricks.delta.optimizeWrite.enabled": "true"
+              "spark.databricks.delta.autoCompact.enabled": "true"
+            data_security_mode: USER_ISOLATION
+
+          libraries:
+            - pypi:
+                package: "dbldatagen>=0.3.0"
+            - pypi:
+                package: "faker>=18.0.0"
+
+      # Job-level configuration
+      max_concurrent_runs: 1
+      timeout_seconds: 3600
+
+      email_notifications:
+        on_failure:
+          - bryan.li@databricks.com

@@ -1,0 +1,298 @@
+# Databricks Asset Bundle Schema Contract
+# Feature: 003-databricks-asset-bundles
+# Purpose: Defines validation contract for bundle configuration
+
+# This file documents the expected bundle structure for test-kit deployment
+# Actual validation performed by: databricks bundle validate
+
+---
+name: Databricks Asset Bundle Validation Contract
+version: 1.0.0
+description: Contract defining valid bundle configuration structure for test-kit
+
+# Bundle Root Configuration (databricks.yml)
+bundle_root:
+  required_fields:
+    - bundle.name
+    - targets
+
+  optional_fields:
+    - variables
+    - include
+    - resources
+
+  validation_rules:
+    - name: bundle_name_format
+      rule: "bundle.name must match pattern: ^[a-z0-9-]+$"
+      example: "test-kit"
+
+    - name: at_least_one_target
+      rule: "targets must contain at least one environment"
+      example: ["dev", "prod"]
+
+# Target Configuration
+target_schema:
+  required_per_target:
+    - workspace.host
+    - mode
+
+  optional_per_target:
+    - workspace.root_path
+    - variables
+    - run_as
+
+  validation_rules:
+    - name: valid_mode
+      rule: "mode must be 'development' or 'production'"
+      dev_value: "development"
+      prod_value: "production"
+
+    - name: workspace_url_format
+      rule: "workspace.host must be valid HTTPS URL"
+      example: "https://e2-demo-field-eng.cloud.databricks.com"
+
+    - name: production_mode_enforcement
+      rule: "mode: production requires explicit --target flag"
+      behavior: "CLI will prompt for confirmation on destructive changes"
+
+# Job Resource Schema
+job_resource_schema:
+  required_fields:
+    - name
+    - tasks
+
+  task_required_fields:
+    - task_key
+    - notebook_task.notebook_path
+
+  validation_rules:
+    - name: unique_task_keys
+      rule: "task_key must be unique within job"
+      example: "generate_data"
+
+    - name: notebook_path_exists
+      rule: "notebook_path must exist relative to bundle root"
+      example: "databricks_app/generation_notebook.py"
+
+    - name: valid_cluster_spec
+      rule: "Either existing_cluster_id OR new_cluster must be specified"
+      recommended: "new_cluster for job-scoped clusters"
+
+    - name: spark_version_format
+      rule: "spark_version must match Databricks runtime version"
+      example: "14.3.x-scala2.12"
+
+# App Resource Schema
+app_resource_schema:
+  required_fields:
+    - name
+    - source_code_path
+
+  validation_rules:
+    - name: source_path_exists
+      rule: "source_code_path must exist and contain app.yaml"
+      example: "react-app/"
+
+    - name: app_yaml_valid
+      rule: "app.yaml must define command and resources"
+      location: "react-app/app.yaml"
+
+    - name: unique_app_name
+      rule: "app name must be unique per workspace"
+      example: "synthetic-data-generator"
+
+# Variable Schema
+variable_schema:
+  structure:
+    variable_name:
+      description: string  # Required for documentation
+      default: any         # Optional default value
+
+  validation_rules:
+    - name: all_variables_resolved
+      rule: "All ${var.X} references must have values"
+      sources: ["variable.default", "target.variables"]
+
+    - name: no_circular_references
+      rule: "Variable definitions cannot reference each other circularly"
+
+# CLI Commands Contract
+
+cli_validation_contract:
+  command: "databricks bundle validate"
+  inputs:
+    - databricks.yml
+    - resources/**/*.yml (if using includes)
+    - source files referenced by resources
+
+  outputs:
+    success:
+      exit_code: 0
+      stdout: "Validation OK!"
+
+    failure:
+      exit_code: 1
+      stderr: |
+        Error: <specific error message>
+        Location: <file>:<line>
+
+  validation_checks:
+    - Schema validation (YAML structure)
+    - Resource reference validation (paths exist)
+    - Variable substitution validation (all vars have values)
+    - Permission check (service principal access)
+
+cli_deployment_contract:
+  command: "databricks bundle deploy --target {dev|prod}"
+  inputs:
+    - Validated bundle configuration
+    - Target environment name
+    - Authentication credentials (env vars or config file)
+
+  outputs:
+    success:
+      exit_code: 0
+      stdout: |
+        Deployment complete!
+        Job ID: <job_id>
+        App URL: <app_url>
+
+    failure:
+      exit_code: 1
+      stderr: |
+        Error: <deployment error>
+        Resource: <resource_name>
+
+  side_effects:
+    - Creates/updates workspace resources (jobs, apps, notebooks)
+    - Writes deployment state to workspace .bundle directory
+    - Triggers app startup (if app resource included)
+
+# Expected Bundle Structure for test-kit
+
+test_kit_bundle_structure:
+  databricks.yml: |
+    bundle:
+      name: test-kit
+
+    variables:
+      catalog_name:
+        description: "Unity Catalog name"
+        default: bryan_li
+      schema_name:
+        description: "Schema name (environment-specific)"
+
+    targets:
+      dev:
+        mode: development
+        workspace:
+          host: https://e2-demo-field-eng.cloud.databricks.com
+        variables:
+          schema_name: synthetic_datasets_dev
+
+      prod:
+        mode: production
+        workspace:
+          host: https://e2-demo-field-eng.cloud.databricks.com
+        variables:
+          schema_name: synthetic_datasets_prod
+
+    include:
+      - resources/jobs/*.yml
+      - resources/apps/*.yml
+
+  resources/jobs/synthetic-data-generation.yml: |
+    resources:
+      jobs:
+        synthetic_data_generation:
+          name: "Synthetic Data Generation (${bundle.target})"
+          tasks:
+            - task_key: generate_data
+              notebook_task:
+                notebook_path: databricks_app/generation_notebook.py
+                base_parameters:
+                  catalog: "${var.catalog_name}"
+                  schema: "${var.schema_name}"
+              new_cluster:
+                spark_version: "14.3.x-scala2.12"
+                node_type_id: "i3.xlarge"
+                num_workers: 2
+
+  resources/apps/synthetic-data-generator.yml: |
+    resources:
+      apps:
+        synthetic_data_generator:
+          name: "Synthetic Data Generator (${bundle.target})"
+          source_code_path: react-app/
+          resources:
+            - name: data_generation_job
+              job:
+                id: "${resources.jobs.synthetic_data_generation.id}"
+                permission: CAN_MANAGE_RUN
+
+# Test Assertions (for contract tests)
+
+contract_test_assertions:
+  - name: "Bundle validates successfully"
+    command: "databricks bundle validate"
+    expected_exit_code: 0
+
+  - name: "Dev target contains development mode"
+    command: "yq '.targets.dev.mode' databricks.yml"
+    expected_output: "development"
+
+  - name: "Prod target contains production mode"
+    command: "yq '.targets.prod.mode' databricks.yml"
+    expected_output: "production"
+
+  - name: "Job resource references valid notebook"
+    assertion: "File databricks_app/generation_notebook.py exists"
+
+  - name: "App resource references valid source"
+    assertion: "Directory react-app/ exists and contains app.yaml"
+
+  - name: "All variables have values in dev"
+    command: "databricks bundle validate --target dev"
+    expected_no_errors: "No unresolved variables"
+
+  - name: "All variables have values in prod"
+    command: "databricks bundle validate --target prod"
+    expected_no_errors: "No unresolved variables"
+
+# Deployment Contract Tests
+
+deployment_contract_tests:
+  - name: "Dev deployment succeeds"
+    setup: "Ensure dev workspace is accessible"
+    command: "databricks bundle deploy --target dev"
+    expected_exit_code: 0
+    assertions:
+      - "Job appears in Jobs UI"
+      - "App appears in Apps UI"
+      - "Notebooks uploaded to workspace"
+
+  - name: "Prod deployment requires explicit flag"
+    command: "databricks bundle deploy"  # No --target flag
+    expected_behavior: "Prompts for target or uses default (dev)"
+
+  - name: "Prod deployment requires confirmation"
+    command: "databricks bundle deploy --target prod"
+    expected_behavior: "Prompts for confirmation due to mode: production"
+
+  - name: "Incremental deployment detects changes"
+    setup: "Deploy once, then modify job config"
+    command: "databricks bundle deploy --target dev"
+    expected_behavior: "Only updates changed job, skips unchanged resources"
+
+---
+
+# Usage in Tests
+
+# Contract tests should validate:
+# 1. Bundle structure matches this schema
+# 2. CLI commands produce expected outputs
+# 3. Deployments create expected resources
+# 4. Safeguards prevent accidental prod deploys
+
+# See ../quickstart.md for manual validation workflow
+# See /tasks command output for automated test tasks
