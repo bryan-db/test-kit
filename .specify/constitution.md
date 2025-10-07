@@ -2,7 +2,27 @@
 
 ## Core Platform Principles
 
-### 1. Databricks Platform Requirements
+### 1. Official Databricks Documentation
+**Principle**: ALWAYS consult official Databricks documentation at https://docs.databricks.com/aws/en before implementing any feature.
+
+**Mandates**:
+- **Primary Source**: Official Databricks docs at https://docs.databricks.com/aws/en
+- **Never assume**: Verify APIs, syntax, and capabilities in official docs
+- **Check for updates**: Databricks releases frequently - verify current best practices
+- **Reference sections**:
+  - Unity Catalog: https://docs.databricks.com/aws/en/data-governance/unity-catalog/
+  - SQL Warehouses: https://docs.databricks.com/aws/en/compute/sql-warehouse/
+  - Asset Bundles: https://docs.databricks.com/aws/en/dev-tools/bundles/
+  - Apps: https://docs.databricks.com/aws/en/dev-tools/databricks-apps/
+  - Statement Execution API: https://docs.databricks.com/aws/en/api/workspace/statementexecution
+- **Document references**: Include doc URLs in code comments for key implementations
+- **Verify examples**: Test all examples from docs before using in production
+
+**Rationale**: Official documentation is the source of truth. Many issues we encountered could have been prevented by consulting docs first (e.g., correct API endpoints, parameter formats, schema naming conventions).
+
+---
+
+### 2. Databricks Platform Requirements
 **Principle**: All features MUST be built specifically for the Databricks platform with Unity Catalog integration.
 
 **Mandates**:
@@ -11,12 +31,13 @@
 - Store all data in Unity Catalog with proper catalog.schema.table naming
 - Use Databricks Asset Bundles (DAB) for deployment and configuration management
 - Leverage Databricks Apps for frontend applications
+- Reference docs: https://docs.databricks.com/aws/en/compute/serverless.html
 
 **Rationale**: Databricks provides managed infrastructure. Never assume we need to provision Spark clusters - they already exist. Use serverless for cost efficiency and auto-scaling.
 
 ---
 
-### 2. Unity Catalog Data Architecture
+### 3. Unity Catalog Data Architecture
 **Principle**: All data MUST follow Unity Catalog three-level namespace and medallion architecture.
 
 **Mandates**:
@@ -28,12 +49,14 @@
 - Never use `raw_data` or other non-standard schema names
 - Always verify actual table names and schemas before writing queries
 - Document catalog structure in data-model.md
+- **Documentation**: https://docs.databricks.com/aws/en/data-governance/unity-catalog/
+- **Best practices**: https://docs.databricks.com/aws/en/lakehouse-architecture/medallion.html
 
 **Rationale**: Unity Catalog enforces governance and our queries failed multiple times due to incorrect schema/table assumptions.
 
 ---
 
-### 3. Schema Validation & Column Names
+### 4. Schema Validation & Column Names
 **Principle**: ALWAYS verify actual table schemas before implementing queries or transformations.
 
 **Mandates**:
@@ -45,7 +68,7 @@
 
 ---
 
-### 4. Databricks SQL Warehouse Configuration
+### 5. Databricks SQL Warehouse Configuration
 **Principle**: Use validated, running SQL Warehouses for all analytics queries.
 
 **Mandates**:
@@ -54,10 +77,14 @@
 - Store warehouse ID in environment variables (e.g., `VITE_DATABRICKS_WAREHOUSE_ID`)
 - Check warehouse status before deployment
 - Document warehouse requirements in deployment docs
+- **Documentation**: https://docs.databricks.com/aws/en/compute/sql-warehouse/
+- **API Reference**: https://docs.databricks.com/aws/en/api/workspace/warehouses
+
+**Rationale**: Initial warehouse ID didn't exist, causing all queries to fail. Always validate warehouse ID before use.
 
 ---
 
-### 5. API Integration & CORS Handling
+### 6. API Integration & CORS Handling
 **Principle**: Frontend applications MUST use proper proxy configuration for Databricks API access.
 
 **Mandates**:
@@ -82,7 +109,7 @@
 
 ---
 
-### 6. Databricks Asset Bundles (DAB)
+### 7. Databricks Asset Bundles (DAB)
 **Principle**: All Databricks resources MUST be managed via Asset Bundles for reproducible deployments.
 
 **Mandates**:
@@ -94,12 +121,14 @@
 - Use bundle variables for environment-specific config
 - Deploy with `databricks bundle deploy -t <environment>`
 - Version control all bundle configurations
+- **Documentation**: https://docs.databricks.com/aws/en/dev-tools/bundles/
+- **Reference**: https://docs.databricks.com/aws/en/dev-tools/bundles/settings.html
 
 **Rationale**: Asset Bundles provide infrastructure-as-code for Databricks, ensuring consistent deployments across environments.
 
 ---
 
-### 7. Databricks Apps Deployment
+### 8. Databricks Apps Deployment
 **Principle**: Frontend applications MUST be deployed as Databricks Apps for integrated authentication and hosting.
 
 **Mandates**:
@@ -108,12 +137,14 @@
 - Configure OAuth or PAT authentication
 - Set correct base paths for production (`/apps/<app-name>`)
 - Test locally before deploying to workspace
+- **Documentation**: https://docs.databricks.com/aws/en/dev-tools/databricks-apps/
+- **App Configuration**: https://docs.databricks.com/aws/en/dev-tools/databricks-apps/app-configuration.html
 
 **Rationale**: Databricks Apps provide secure, integrated hosting with built-in authentication and Databricks API access.
 
 ---
 
-### 8. Environment Configuration
+### 9. Environment Configuration
 **Principle**: Environment-specific configuration MUST be externalized and validated.
 
 **Mandates**:
@@ -131,7 +162,7 @@
 
 ---
 
-### 9. Data Processing with Serverless
+### 10. Data Processing with Serverless
 **Principle**: All data transformations MUST use Databricks Serverless Compute.
 
 **Mandates**:
@@ -145,7 +176,7 @@
 
 ---
 
-### 10. Testing Against Real Infrastructure
+### 11. Testing Against Real Infrastructure
 **Principle**: All tests MUST validate against actual Databricks resources, not mocks.
 
 **Mandates**:
@@ -158,7 +189,7 @@
 
 ---
 
-### 11. Error Handling & Debugging
+### 12. Error Handling & Debugging
 **Principle**: Provide detailed error messages with Databricks-specific context.
 
 **Mandates**:
@@ -172,7 +203,7 @@
 
 ---
 
-### 12. Frontend Data Fetching
+### 13. Frontend Data Fetching
 **Principle**: React dashboards MUST use React Query with proper caching and error handling.
 
 **Mandates**:
@@ -187,7 +218,7 @@
 
 ---
 
-### 13. Development Workflow
+### 14. Development Workflow
 **Principle**: Support local development with production-like environment.
 
 **Mandates**:
@@ -202,7 +233,7 @@
 
 ---
 
-### 14. Version Control & Release Management
+### 15. Version Control & Release Management
 **Principle**: All code MUST be version controlled with regular commits and tagged releases for rollback capability.
 
 **Mandates**:
