@@ -256,7 +256,64 @@
 
 ---
 
-### 16. Databricks MCP Server Deployment
+### 16. React.js Frontend with DesignBricks Components
+**Principle**: All Databricks Apps MUST use the latest stable release of React.js with DesignBricks component library following official Databricks branding guidelines.
+
+**Mandates**:
+- **React Version**: Use latest stable React (18.x or higher)
+- **Component Library**: Install and use DesignBricks for all UI components
+  ```bash
+  npm install designbricks
+  # or
+  yarn add designbricks
+  ```
+- **DesignBricks Components**: Use DesignBricks components instead of Material-UI/other libraries
+  - Foundation: Button, Typography
+  - Inputs: TextField, Checkbox, Select
+  - Feedback: Alert, Toast
+  - Data Display: Card, Table, DataGrid
+  - Example usage:
+    ```jsx
+    import { Button, Card, Typography } from 'designbricks';
+
+    function Dashboard() {
+      return (
+        <Card variant="elevated">
+          <Typography variant="h3">Campaign Performance</Typography>
+          <Button variant="primary">View Details</Button>
+        </Card>
+      );
+    }
+    ```
+- **Branding Guidelines**: Follow Databricks Brand Guidelines at https://brand.databricks.com/
+  - **Colors**:
+    - Primary background: `#F9F7F4` (light cream)
+    - Primary text: `#0B2026` (dark navy blue)
+    - Links: `#4A4A4A` (default), `#F1F5FA` (hover)
+  - **Typography**:
+    - Font family: 'DM Sans', Arial, sans-serif
+    - Headings: font-weight 500
+    - Body text: font-weight 400
+  - **Design Principles**:
+    - Clean, minimalist design
+    - Subtle hover and interaction states
+    - Muted color palette
+    - Emphasis on readability and whitespace
+- **Design Tokens**: Use DesignBricks design tokens for colors, spacing, typography
+- **Accessibility**: Ensure WCAG 2.1 AA compliance (DesignBricks is accessibility-focused)
+- **Responsive Design**: Use DesignBricks responsive utilities for mobile/tablet/desktop
+- **Data Visualization**: Use DesignBricks data visualization components optimized for Databricks
+- **Consistency**: All apps should have consistent look-and-feel using DesignBricks
+
+**Rationale**: DesignBricks provides a community-driven implementation of the Databricks design system with extended functionality. Using a consistent component library ensures all Databricks Apps have unified branding, improved developer productivity through reusable components, and better user experience through familiar UI patterns. Following official branding guidelines maintains professional appearance and Databricks brand identity.
+
+**Documentation**:
+- DesignBricks: https://github.com/PulkitXChadha/DesignBricks
+- Databricks Brand Guidelines: https://brand.databricks.com/
+
+---
+
+### 17. Databricks MCP Server Deployment
 **Principle**: Deploy Databricks MCP (Model Context Protocol) server as part of environment configuration for AI-assisted development.
 
 **Mandates**:
@@ -324,5 +381,5 @@ Before implementing any feature, verify:
 
 ---
 
-**Last Updated**: 2025-10-07 (Added Principle #16: MCP Server Deployment)
+**Last Updated**: 2025-10-07 (Added Principles #16-17: React/DesignBricks, MCP Server)
 **Contributors**: Implementation team based on Feature 004 learnings
