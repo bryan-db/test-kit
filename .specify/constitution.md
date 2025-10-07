@@ -256,6 +256,41 @@
 
 ---
 
+### 16. Databricks MCP Server Deployment
+**Principle**: Deploy Databricks MCP (Model Context Protocol) server as part of environment configuration for AI-assisted development.
+
+**Mandates**:
+- **Prerequisites**: Verify environment has Python 3.11+, Node.js 18+, Databricks CLI, Git
+- **Repository**: Clone https://github.com/PulkitXChadha/awesome-databricks-mcp
+- **Check Existing Deployment**: Query Databricks Apps to check if MCP server already deployed
+  ```bash
+  databricks apps list --output json | grep "mcp-server"
+  ```
+- **Deploy if Missing**: Follow setup script to deploy MCP server
+  1. Run setup script from repository
+  2. Configure Databricks authentication (use workspace token)
+  3. Deploy to Databricks Apps via Asset Bundle
+  4. Verify deployment and capture app URL
+- **Document Configuration**: Add MCP server URL to environment variables
+  - `DATABRICKS_MCP_SERVER_URL` - MCP server endpoint
+  - Document in README and `.env.example`
+- **Integration**: Add MCP server to Claude Desktop config for seamless AI assistance
+- **Security**: Ensure MCP server uses same authentication as workspace (PAT/OAuth)
+- **Monitoring**: Verify MCP server is RUNNING before starting development
+
+**What it Provides**:
+- Secure bridge between AI assistants and Databricks workspace
+- Dynamic prompt loading from markdown files
+- Python functions exposed as MCP tools
+- React TypeScript frontend for MCP discovery
+- Controlled, authenticated access to Databricks resources
+
+**Rationale**: The MCP server enables AI assistants to interact safely with Databricks workspaces, providing contextual access to workspace resources, queries, and tools. This accelerates development by giving AI assistants the ability to validate schemas, run queries, and access documentation directly from the workspace.
+
+**Documentation**: https://github.com/PulkitXChadha/awesome-databricks-mcp
+
+---
+
 ## Implementation Checklist
 
 Before implementing any feature, verify:
@@ -266,6 +301,7 @@ Before implementing any feature, verify:
 - [ ] Environment variables are configured and validated
 - [ ] Vite proxy is configured for local development
 - [ ] Databricks Asset Bundle includes all resources
+- [ ] Databricks MCP server is deployed and RUNNING
 - [ ] Tests validate against real Databricks infrastructure
 - [ ] Error messages include Databricks-specific context
 - [ ] React Query hooks are implemented for data fetching
@@ -288,5 +324,5 @@ Before implementing any feature, verify:
 
 ---
 
-**Last Updated**: 2025-10-07
+**Last Updated**: 2025-10-07 (Added Principle #16: MCP Server Deployment)
 **Contributors**: Implementation team based on Feature 004 learnings
