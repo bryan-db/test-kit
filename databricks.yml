@@ -25,9 +25,25 @@ variables:
 
 # Resources: Job and App definitions
 resources:
+  # T009: Serverless SQL Warehouse for analytics pipelines
+  sql_warehouses:
+    analytics_warehouse:
+      name: "marketing-analytics-warehouse-${bundle.target}"
+      cluster_size: "Small"
+      enable_photon: true
+      enable_serverless_compute: true
+      auto_stop_mins: 10
+      tags:
+        custom_tags:
+          - key: "feature"
+            value: "004-data-exploration-frontend"
+          - key: "purpose"
+            value: "gold-layer-transformations"
+
   jobs:
+    # Feature 001: Synthetic data generation job
     synthetic_data_generation:
-      name: "Synthetic Data Generation (${bundle.target})"
+      name: "synthetic-data-generation-${bundle.target}"
 
       tasks:
         - task_key: generate_data
@@ -60,21 +76,92 @@ resources:
         on_failure:
           - bryan.li@databricks.com
 
-  apps:
-    synthetic_data_generator:
-      name: "Synthetic Data Generator (${bundle.target})"
-      description: "React application for configuring and triggering synthetic identity graph data generation"
+    # Feature 004: Marketing Analytics ETL Pipeline (T029 - Hourly refresh)
+    marketing_analytics_etl:
+      name: "marketing-analytics-etl-${bundle.target}"
 
-      # Path to React app source code
-      source_code_path: react-app/
+      tasks:
+        # Task 1: Bronze to Silver (Data Cleansing)
+        - task_key: bronze_to_silver
+          notebook_task:
+            notebook_path: databricks_app/src/pipelines/bronze_to_silver.py
+            base_parameters:
+              catalog: "${var.catalog_name}"
 
-      # Grant app permission to manage the data generation job
-      resources:
-        - name: data_generation_job
-          description: "Job that generates synthetic identity graph data"
-          job:
-            id: "${resources.jobs.synthetic_data_generation.id}"
-            permission: CAN_MANAGE_RUN
+          new_cluster:
+            spark_version: "14.3.x-scala2.12"
+            node_type_id: "${var.cluster_node_type}"
+            num_workers: "${var.cluster_num_workers}"
+            spark_conf:
+              "spark.databricks.delta.optimizeWrite.enabled": "true"
+              "spark.databricks.delta.autoCompact.enabled": "true"
+              "spark.databricks.photon.enabled": "true"
+            data_security_mode: USER_ISOLATION
+
+        # Task 2: Silver to Gold (Metric Aggregation)
+        - task_key: silver_to_gold
+          depends_on:
+            - task_key: bronze_to_silver
+
+          notebook_task:
+            notebook_path: databricks_app/src/pipelines/silver_to_gold.py
+            base_parameters:
+              catalog: "${var.catalog_name}"
+
+          new_cluster:
+            spark_version: "14.3.x-scala2.12"
+            node_type_id: "${var.cluster_node_type}"
+            num_workers: "${var.cluster_num_workers}"
+            spark_conf:
+              "spark.databricks.delta.optimizeWrite.enabled": "true"
+              "spark.databricks.delta.autoCompact.enabled": "true"
+              "spark.databricks.photon.enabled": "true"
+            data_security_mode: USER_ISOLATION
+
+        # Task 3: Sync Table Refresh (Lakebase publish)
+        - task_key: sync_table_refresh
+          depends_on:
+            - task_key: silver_to_gold
+
+          notebook_task:
+            notebook_path: databricks_app/src/pipelines/sync_table_refresh.py
+            base_parameters:
+              catalog: "${var.catalog_name}"
+              action: "refresh"
+
+          new_cluster:
+            spark_version: "14.3.x-scala2.12"
+            node_type_id: "i3.xlarge"
+            num_workers: 1
+            data_security_mode: USER_ISOLATION
+
+      schedule:
+        quartz_cron_expression: "0 0 * * * ?"  # Run hourly at minute 0
+        timezone_id: "America/Los_Angeles"
+        pause_status: UNPAUSED
+
+      max_concurrent_runs: 1
+      timeout_seconds: 3600
+
+      email_notifications:
+        on_failure:
+          - bryan.li@databricks.com
+
+  # apps:
+  #   synthetic_data_generator:
+  #     name: "synthetic-data-generator-${bundle.target}"
+  #     description: "React application for configuring and triggering synthetic identity graph data generation"
+
+  #     # Path to React app source code
+  #     source_code_path: react-app/
+
+  #     # Grant app permission to manage the data generation job
+  #     resources:
+  #       - name: data_generation_job
+  #         description: "Job that generates synthetic identity graph data"
+  #         job:
+  #           id: "${resources.jobs.synthetic_data_generation.id}"
+  #           permission: CAN_MANAGE_RUN
 
 # Targets: Environment-specific configurations
 targets:

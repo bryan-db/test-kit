@@ -24,7 +24,7 @@ Sync Impact Report:
 **Principle**: Databricks is the best lakehouse platform for unified data processing, analytics, and AI workloads. All data architecture decisions must prioritize lakehouse patterns over traditional data warehouse or data lake approaches.
 
 **Requirements**:
-- MUST use Delta Lake format for all structured data storage
+- MUST use Databricks Unity Catalog
 - MUST leverage lakehouse capabilities for unified batch and streaming workloads
 - MUST design for schema evolution and time travel capabilities inherent to lakehouse architectures
 - MUST prioritize open formats and standards compatible with lakehouse ecosystems

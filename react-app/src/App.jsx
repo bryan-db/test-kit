@@ -17,6 +17,15 @@ import { updateConfigSection } from './services/configService';
 import { AuthProvider } from './services/authService.jsx';
 import theme from './theme/theme';
 
+// Feature 004: Analytics Dashboards
+import Navigation from './components/shared/Navigation';
+import CampaignPerformance from './components/dashboards/CampaignPerformance';
+import DataOverview from './components/dashboards/DataOverview';
+import AudienceInsights from './components/dashboards/AudienceInsights';
+import ContentEngagement from './components/dashboards/ContentEngagement';
+import AttributionAnalysis from './components/dashboards/AttributionAnalysis';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 /**
  * Wizard Step Router Component
  * Handles routing between wizard steps with progress tracking
@@ -159,6 +168,20 @@ function WizardRouter() {
 }
 
 /**
+ * Dashboard Layout Component with Navigation
+ */
+function DashboardLayout({ children }) {
+  return (
+    <>
+      <Navigation />
+      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+        {children}
+      </Container>
+    </>
+  );
+}
+
+/**
  * Main App Component with Router
  */
 function App() {
@@ -166,18 +189,62 @@ function App() {
     ? '/apps/synthetic-data-generator-react'
     : '/';
 
+  // Create QueryClient for TanStack Query
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        cacheTime: 10 * 60 * 1000, // 10 minutes
+        refetchOnWindowFocus: false,
+        retry: 2,
+      },
+    },
+  });
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-        <BrowserRouter basename={basename}>
-          <Routes>
-            <Route path="/wizard/:step" element={<WizardRouter />} />
-            <Route path="/job/:runId" element={<JobMonitor />} />
-            <Route path="/" element={<Navigate to="/wizard/0" replace />} />
-            <Route path="*" element={<Navigate to="/wizard/0" replace />} />
-          </Routes>
-        </BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter basename={basename}>
+            <Routes>
+              {/* Wizard Routes */}
+              <Route path="/wizard/:step" element={<WizardRouter />} />
+              <Route path="/job/:runId" element={<JobMonitor />} />
+
+              {/* Dashboard Routes */}
+              <Route path="/dashboards/overview" element={
+                <DashboardLayout>
+                  <DataOverview />
+                </DashboardLayout>
+              } />
+              <Route path="/dashboards/campaigns" element={
+                <DashboardLayout>
+                  <CampaignPerformance />
+                </DashboardLayout>
+              } />
+              <Route path="/dashboards/audience" element={
+                <DashboardLayout>
+                  <AudienceInsights />
+                </DashboardLayout>
+              } />
+              <Route path="/dashboards/content" element={
+                <DashboardLayout>
+                  <ContentEngagement />
+                </DashboardLayout>
+              } />
+              <Route path="/dashboards/attribution" element={
+                <DashboardLayout>
+                  <AttributionAnalysis />
+                </DashboardLayout>
+              } />
+
+              {/* Root - redirect to data overview */}
+              <Route path="/" element={<Navigate to="/dashboards/overview" replace />} />
+              <Route path="*" element={<Navigate to="/dashboards/overview" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </QueryClientProvider>
       </AuthProvider>
     </ThemeProvider>
   );

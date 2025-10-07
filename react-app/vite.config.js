@@ -31,12 +31,13 @@ export default defineConfig({
     // Proxy API calls to Databricks during local development
     proxy: {
       '/api/2.0': {
-        target: process.env.VITE_DATABRICKS_HOST || 'https://e2-demo-field-eng.cloud.databricks.com',
+        target: 'https://e2-demo-field-eng.cloud.databricks.com',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path
       },
       '/oauth': {
-        target: process.env.VITE_DATABRICKS_HOST || 'https://e2-demo-field-eng.cloud.databricks.com',
+        target: 'https://e2-demo-field-eng.cloud.databricks.com',
         changeOrigin: true,
         secure: false,
       },

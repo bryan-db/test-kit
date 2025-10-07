@@ -68,6 +68,22 @@ export function formatBytes(bytes) {
 }
 
 /**
+ * Format a number as currency
+ * @param {number} amount - Amount to format
+ * @param {string} currency - Currency code (default: 'USD')
+ * @returns {string} Formatted currency (e.g., "$1,000.00")
+ */
+export function formatCurrency(amount, currency = 'USD') {
+  if (amount === null || amount === undefined || isNaN(amount)) {
+    return '$0.00';
+  }
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency
+  }).format(amount);
+}
+
+/**
  * Format a date to ISO 8601 string
  * @param {Date} date - Date object
  * @returns {string} ISO 8601 formatted date
